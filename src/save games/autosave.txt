@@ -1,0 +1,1 @@
+The autosaves in the stage of development will stay in this folder.
