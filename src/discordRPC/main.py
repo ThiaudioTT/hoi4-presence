@@ -18,7 +18,13 @@ while True:  # The presence will stay on as long as the program is running, so u
       data = re.findall("\w+", data, flags=re.A) # now it is an array of data
 
       # TODO: put the government type
-      RPC.update(details="Playing as ", state=data[1]) # TODO: use a switch case to get the country name
+      RPC.update(
+         details="Playing as " + data[1], # put this in a var, use switch
+         state=data[2],
+         large_image="german_reich"
+      )
+      
+      # TODO: use a switch case to get the country name
       print(data) # debug
    except Exception as e:
       print(e)
