@@ -4,20 +4,26 @@ import re
 import time
 import os
 
-client_id = '1021549599732809820'
-RPC = Presence(client_id)  # Initialize the Presence class
-RPC.connect()  # Start the handshake loop
+try:
+   client_id = '1021549599732809820'
+   RPC = Presence(client_id)  # Initialize the Presence class
+   RPC.connect()  # Start the handshake loop
 
-playTime = time.time()
+   playTime = time.time()
 
-# default values
-RPC.update(
-   details="In launcher",
-   large_image="hoi4-logo", # put this in a var?
-   start=playTime
-)
+   # default values
+   RPC.update(
+      details="In launcher",
+      large_image="hoi4-logo", # put this in a var?
+      start=playTime
+   )
+except Exception as e:
+   print(e)
+   time.sleep(5)
+   exit() # when discord isnt found, exit script
 
-while True:  # The presence will stay on as long as the program is running, so use some lib
+gameRunning = True
+while gameRunning:  # The presence will stay on as long as the program is running, so use some lib
    try:
 
       path = Path(__file__).parent.parent / "save games/autosave.hoi4"
@@ -87,7 +93,11 @@ while True:  # The presence will stay on as long as the program is running, so u
          print(data) # debug
    except Exception as e:
       print(e)
+   
    time.sleep(60) #Wait a wee bit
+
+   # gameRunning = False
+
    # time.sleep(5)
 
 #TODO do an algo to auto quit the script when hoi4 is closed
