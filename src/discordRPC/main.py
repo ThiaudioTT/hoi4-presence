@@ -17,15 +17,42 @@ while True:  # The presence will stay on as long as the program is running, so u
 
       data = re.findall("\w+", data, flags=re.A) # now it is an array of data
 
+
+      # TODO add flags in country
+      # define country, hint: use discord developer portal
+      country = ""
+      flag = ""
+      match data[1]:
+         case "GER":
+            country = "Germany"
+         case "ITA":
+            country = "Italy"
+         case "JAP":
+            country = "Japan"
+         case "SOV":
+            country = "Soviet Union"
+         case "POL":
+            country = "Poland"
+         case "FRA":
+            country = "France"
+            flag = "france"
+         case "USA":
+            country = "United States"
+         case "ENG":
+            country = "United Kingdom"
+         case other:
+            country = data[1]
+            flag = "hoi4-logo"
+
       # TODO: put the government type
       RPC.update(
-         details="Playing as " + data[1], # put this in a var, use switch
-         state=data[2],
-         large_image="german_reich"
+         details="Playing as " + country,
+         large_image=flag
       )
       
       # TODO: use a switch case to get the country name
       print(data) # debug
+
    except Exception as e:
       print(e)
    # time.sleep(60) #Wait a wee bit
