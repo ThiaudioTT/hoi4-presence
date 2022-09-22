@@ -3,6 +3,7 @@ from pathlib import Path
 import re
 import time
 import os
+import psutil
 
 try:
    client_id = '1021549599732809820'
@@ -95,9 +96,10 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
       print(e)
    
    time.sleep(60) #Wait a wee bit
+   gameRunning = False
+   for proc in psutil.process_iter():
+      if proc.name() == "hoi4.exe" or proc.name() == "Paradox Launcher.exe":
+         gameRunning = True
+         break
 
-   # gameRunning = False
-
-   # time.sleep(5)
-
-#TODO do an algo to auto quit the script when hoi4 is closed
+exit() # when game running is false, exit script
