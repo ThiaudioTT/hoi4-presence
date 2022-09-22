@@ -4,6 +4,7 @@ import re
 import time
 import os
 import psutil
+import sys
 
 try:
    client_id = '1021549599732809820'
@@ -102,4 +103,4 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
          gameRunning = True
          break
 
-exit() # when game running is false, exit script
+sys.exit(0) # when game running is false, exit script
