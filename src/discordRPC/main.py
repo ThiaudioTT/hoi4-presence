@@ -2,58 +2,92 @@ from pypresence import Presence
 from pathlib import Path
 import re
 import time
+import os
 
 client_id = '1021549599732809820'
 RPC = Presence(client_id)  # Initialize the Presence class
 RPC.connect()  # Start the handshake loop
 
+playTime = time.time()
+
+# default values
+RPC.update(
+   details="In launcher",
+   large_image="hoi4-logo", # put this in a var?
+   start=playTime
+)
+
 while True:  # The presence will stay on as long as the program is running, so use some lib
    try:
-      # save = open("C:/Dev/hoi4RPCpy/src/save games/autosave.hoi4", "r", errors="ignore")
+
       path = Path(__file__).parent.parent / "save games/autosave.hoi4"
-      save = open(path, "r", errors="ignore")
-      data = save.readline() # it will be a line full of unicode chars
-      save.close() # close file, hoi4 needs to have access to write it, see path.py in tests.
+      dateFile = int(os.path.getmtime(path))
+      now = int(time.time())
+      saveNew = False
+      if (now - dateFile) <= 65: # calc to see if autosave is renctly
+         saveNew = True
+      else:
+         saveNew = False
 
-      data = re.findall("\w+", data, flags=re.A) # now it is an array of data
-
-
-      # TODO add flags in country
-      # define country, hint: use discord developer portal
-      country = ""
-      flag = ""
-      match data[1]:
-         case "GER":
-            country = "Germany"
-         case "ITA":
-            country = "Italy"
-         case "JAP":
-            country = "Japan"
-         case "SOV":
-            country = "Soviet Union"
-         case "POL":
-            country = "Poland"
-         case "FRA":
-            country = "France"
-            flag = "france"
-         case "USA":
-            country = "United States"
-         case "ENG":
-            country = "United Kingdom"
-         case other:
-            country = data[1]
-            flag = "hoi4-logo"
-
-      # TODO: put the government type
-      RPC.update(
-         details="Playing as " + country,
-         large_image=flag
-      )
       
-      # TODO: use a switch case to get the country name
-      print(data) # debug
+      if(saveNew): 
+         # putting this in a function might be good.
 
+         save = open(path, "r", errors="ignore")
+         data = save.readline() # it will be a line full of unicode chars
+         save.close() # close file, hoi4 needs to have access to write it, see path.py in tests.
+         data = re.findall("[A-Z_]+", data, flags=re.A|re.I) # now it is an array of data
+
+         # define country, hint: use discord developer portal
+         gov = data[3][:-1] # get the government type and remove J char
+         mode = data[4]
+
+         flag = ""
+         country = data[2]
+
+         match country:
+            case "GER":
+               country = "Germany"
+               flag = "german_reich"
+            case "ITA":
+               country = "Italy"
+               flag = "italy"
+            case "JAP":
+               country = "Japan"
+               flag = "japan"
+            case "SOV":
+               country = "Soviet Union"
+               flag = "soviet_union"
+            case "POL":
+               country = "Poland"
+               flag = "poland"
+            case "FRA":
+               country = "France"
+               flag = "france"
+            case "USA":
+               country = "United States"
+               flag = "united_states"
+            case "ENG":
+               country = "United Kingdom"
+               flag = "united_kingdom"
+            case other:
+               country = data[1]
+               flag = "hoi4-logo"
+         
+         RPC.update(
+            state="In " + gov,
+            details="Playing as " + country,
+            large_image=flag,
+            large_text="Hearts of Iron IV",
+            small_image="hoi4-logo",
+            small_text="In " + mode + " mode",
+            start=playTime
+         )
+         
+         print(data) # debug
    except Exception as e:
       print(e)
-   # time.sleep(60) #Wait a wee bit
-   time.sleep(5)
+   time.sleep(60) #Wait a wee bit
+   # time.sleep(5)
+
+#TODO do an algo to auto quit the script when hoi4 is closed
