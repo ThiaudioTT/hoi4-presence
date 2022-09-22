@@ -32,7 +32,7 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
       dateFile = int(os.path.getmtime(path))
       now = int(time.time())
       saveNew = False
-      if (now - dateFile) <= 65: # calc to see if autosave is renctly
+      if (now - dateFile) <= 120: # calc to see if autosave is recently (2 min recently)
          saveNew = True
       else:
          saveNew = False
@@ -96,7 +96,7 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
    except Exception as e:
       print(e)
    
-   time.sleep(60) #Wait a wee bit
+   time.sleep(30) #Wait a wee bit
    gameRunning = False
    for proc in psutil.process_iter():
       if proc.name() == "hoi4.exe" or proc.name() == "Paradox Launcher.exe":
