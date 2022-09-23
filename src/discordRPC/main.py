@@ -41,17 +41,22 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
       if(saveNew): 
          # putting this in a function might be good.
 
-         save = open(path, "r", errors="ignore")
-         data = save.readline() # it will be a line full of unicode chars
+         save = open(path, "r")
+         data = ""
+         for i in range(5):
+            data += save.readline()
          save.close() # close file, hoi4 needs to have access to write it, see path.py in tests.
-         data = re.findall("[A-Z_]+", data, flags=re.A|re.I) # now it is an array of data
 
-         # define country, hint: use discord developer portal
-         gov = data[3][:-1] # get the government type and remove J char
-         mode = data[4]
+         data = re.sub("(HOI4txt|player=|ideology=|date=|difficulty=|\")", "", data).split()
+         # example of data:
+         # ['GER', 'fascism', '1936.2.1.2', 'normal']
 
-         flag = ""
-         country = data[2]
+         # defining the country
+         country = data[0]
+         flag = "" # to be set later
+         ideology = data[1]
+         year = data[2][:4]
+         mode = data[3]
 
          match country:
             case "GER":
@@ -82,11 +87,12 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
                country = data[1]
                flag = "hoi4-logo"
          
+         # hint: use discord developer portal
          RPC.update(
-            state="In " + gov,
+            state="Year: " + year,
             details="Playing as " + country,
             large_image=flag,
-            large_text="Hearts of Iron IV",
+            large_text="Ideology: " + ideology,
             small_image="hoi4-logo",
             small_text="In " + mode + " mode",
             start=playTime
