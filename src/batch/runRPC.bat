@@ -4,5 +4,5 @@ echo "starting hoi4RPC..."
 start "hoi4.exe" "./hoi4.exe"
 
 @REM start "hoi4RPC.exe" "PATH TO DISCORD RPC, IN CASE IT IS ON ANOTHER FOLDER"
-start "hoi4RPC.exe" "C:\Users\%USERNAME%\Documents\Paradox Interactive\Hearts of Iron IV\discordRPC\hoi4RPC.exe"
+start "hoi4RPC.exe" "C:\Users\%USERNAME%\Documents\Paradox Interactive\Hearts of Iron IV\discordRPC\hoi4Presence.exe"
 exit

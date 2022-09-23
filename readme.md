@@ -23,7 +23,7 @@ https://www.reddit.com/r/Steam/comments/enrddy/is_there_any_way_to_launch_anothe
 # Compiling from source:
 go to /DiscordRPC and execute it using pyinstaller:
 
-```pyinstaller.exe main.py --name hoi4RPC --noconsole --clean```
+```pyinstaller.exe main.py --name hoi4Presence --noconsole --clean```
 
 Don't compile in one file, it wont work.
 
@@ -38,3 +38,9 @@ In `launcher-settings.json`, change exePath:
 Case if the save game folder isn't in C:/
 In the batch, change the config...
 TODO...
+
+# configuring the saves
+in settings.txt,
+save_as_binary=no
+
+you can as well change the autosave.
