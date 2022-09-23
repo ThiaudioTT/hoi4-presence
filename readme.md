@@ -23,7 +23,9 @@ https://www.reddit.com/r/Steam/comments/enrddy/is_there_any_way_to_launch_anothe
 # Compiling from source:
 go to /DiscordRPC and execute it using pyinstaller:
 
-```pyinstaller.exe main.py --name hoi4RPC --onefile --noconsole --clean```
+```pyinstaller.exe main.py --name hoi4RPC --noconsole --clean```
+
+Don't compile in one file, it wont work.
 
 # Configuring the batch
 

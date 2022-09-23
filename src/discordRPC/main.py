@@ -28,7 +28,7 @@ gameRunning = True
 while gameRunning:  # The presence will stay on as long as the program is running, so use some lib
    try:
 
-      path = Path(__file__).parent.parent / "save games/autosave.hoi4"
+      path = Path(__file__).parent.parent / "save games/autosave.hoi4" # wont work if you compile in one single file
       dateFile = int(os.path.getmtime(path))
       now = int(time.time())
       saveNew = False
