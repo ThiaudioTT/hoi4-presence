@@ -15,14 +15,15 @@ try:
 
    # default values
    RPC.update(
-      details="In launcher",
+      details="In menus...",
       large_image="hoi4-logo", # put this in a var?
+      large_text="thiaudiott/hoi4-presence on Github!",
       start=playTime
    )
 except Exception as e:
    print(e)
    time.sleep(5)
-   exit() # when discord isnt found, exit script
+   sys.exit(1) # when discord isnt found, exit script
 
 gameRunning = True
 while gameRunning:  # The presence will stay on as long as the program is running, so use some lib
@@ -32,6 +33,8 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
       dateFile = int(os.path.getmtime(path))
       now = int(time.time())
       saveNew = False
+
+      # TODO: you can use any file, only check if is new.
       if (now - dateFile) <= 120: # calc to see if autosave is recently (2 min recently)
          saveNew = True
       else:
@@ -105,7 +108,7 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
    time.sleep(30) #Wait a wee bit
    gameRunning = False
    for proc in psutil.process_iter():
-      if proc.name() == "hoi4.exe" or proc.name() == "Paradox Launcher.exe":
+      if proc.name() == "hoi4.exe":
          gameRunning = True
          break
 
