@@ -1,46 +1,93 @@
-# WIP
-Currently working on it
+# Hoi4 Discord Rich presence
 
-## Won't work on all play modes
+## Download and install
 
-- Does not work on cloud
-- Does not work when in Ironman mode
-- Only Windows
+Download the lastest presence from:
 
-## How it works
+[Releases](https://github.com/ThiaudioTT/hoi4-presence/releases)
 
-It uses the autosave to get data [ ... ]
+It's named as `hoi4-presence-vVERSION.zip`
 
-TODO
+Extract the files into a folder, and
 
+Then, execute `setup.exe` to install.
 
-# Source of the images:
+The script will do all the work for you.
 
-https://hoi4.paradoxwikis.com/Hearts_of_Iron_4_Wiki
-https://www.reddit.com/r/hoi4/comments/85l962/new_game_icon_made_by_me_the_original_sucks_free/
-https://www.reddit.com/r/Steam/comments/enrddy/is_there_any_way_to_launch_another_program/
+After the execution, you can delete the files.
 
-# Compiling from source:
-go to /DiscordRPC and execute it using pyinstaller:
+---
+
+## Uninstalling
+
+Inside your game folder, you will see a file named `launcher-settings.json`.
+
+Inside of it:
+
+change `"exePath": "runRPC.exe",` to
+`"exePath": "hoi4.exe",`
+
+You can delete all the other files originated from discord presence.
+
+---
+
+## Submiting an issue
+
+Found a bug? Submit it in:
+
+[Issues](https://github.com/ThiaudioTT/hoi4-presence/issues)
+
+---
+
+## Contributing
+
+Feel free to contribute! Open a [pull request](https://github.com/ThiaudioTT/hoi4-presence/pulls).
+
+Searching for a good [issue](https://github.com/ThiaudioTT/hoi4-presence/labels/good%20first%20issue) to start?
+
+---
+
+## how the presence works?
+
+It uses the autosave to get data. So, spend one month in the game to update the presence.
+
+TODO...
+
+---
+
+## Image sources
+
+[Hoi4 Wiki](https://hoi4.paradoxwikis.com/Hearts_of_Iron_4_Wiki)
+
+[Logo](https://www.reddit.com/r/hoi4/comments/85l962/new_game_icon_made_by_me_the_original_sucks_free/)
+
+---
+
+## Compiling from source
+
+You dont believe in my .exe files? :(
+
+Go to /DiscordRPC and execute it using pyinstaller:
 
 ```pyinstaller.exe main.py --name hoi4Presence --noconsole --clean```
 
 Don't compile in one file, it wont work.
 
-# Configuring the batch
+### Configuring the batch
 
-The batch is for executing the RPC without doing it yourself
+The batch is for executing the presence without doing it yourself.
 
-In `launcher-settings.json`, change exePath:
+In `launcher-settings.json` (in your game folder), change exePath:
 
 `"exePath": "runRPC.bat",`
 
-Case if the save game folder isn't in C:/
-In the batch, change the config...
-TODO...
+if the save game folder isn't in your documents folder
+change the line in `runRPC.bat` manually.
 
-# configuring the saves
-in settings.txt,
+### Changing settings.txt
+
+in settings.txt, (in your save folder) change:
+
 save_as_binary=no
 
-you can as well change the autosave.
+and you're done.
