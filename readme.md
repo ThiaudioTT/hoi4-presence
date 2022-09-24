@@ -1,5 +1,7 @@
 # Hoi4 Discord Rich presence
 
+![demonstration](/tests/demo.PNG)
+
 ## Download and install
 
 Download the lastest presence from:
