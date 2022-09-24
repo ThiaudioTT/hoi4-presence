@@ -107,4 +107,6 @@ except Exception as e:
 print("\n\nSuccess! The hoi4Presence is installed in your game folder.\n\n")
 print("Execute the game via launcher to auto activate the presence.\n\nYou can delete this folder now.\n\n")
 print("See https://github.com/ThiaudioTT/hoi4-presence for updates and more information.\n\n")
+input()
+time.sleep(5)
 sys.exit()
