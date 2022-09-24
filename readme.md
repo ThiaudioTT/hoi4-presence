@@ -16,8 +16,6 @@ The script will do all the work for you.
 
 After the execution, you can delete the files.
 
----
-
 ## Uninstalling
 
 Inside your game folder, you will see a file named `launcher-settings.json`.
@@ -29,15 +27,11 @@ change `"exePath": "runRPC.exe",` to
 
 You can delete all the other files originated from discord presence.
 
----
-
 ## Submiting an issue
 
 Found a bug? Submit it in:
 
 [Issues](https://github.com/ThiaudioTT/hoi4-presence/issues)
-
----
 
 ## Contributing
 
@@ -45,23 +39,17 @@ Feel free to contribute! Open a [pull request](https://github.com/ThiaudioTT/hoi
 
 Searching for a good [issue](https://github.com/ThiaudioTT/hoi4-presence/labels/good%20first%20issue) to start?
 
----
-
 ## how the presence works?
 
 It uses the autosave to get data. So, spend one month in the game to update the presence.
 
 TODO...
 
----
-
 ## Image sources
 
 [Hoi4 Wiki](https://hoi4.paradoxwikis.com/Hearts_of_Iron_4_Wiki)
 
 [Logo](https://www.reddit.com/r/hoi4/comments/85l962/new_game_icon_made_by_me_the_original_sucks_free/)
-
----
 
 ## Compiling from source
 
