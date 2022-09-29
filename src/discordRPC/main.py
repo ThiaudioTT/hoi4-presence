@@ -40,7 +40,6 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
       # getting the last modified save file
       listSaves = glob.glob(path)
       lastSavePath = max(listSaves, key=os.path.getmtime)
-      print(lastSavePath)
 
       dateFile = int(os.path.getmtime(lastSavePath))
       now = int(time.time())
