@@ -37,6 +37,6 @@ def checkUpdate():
         time.sleep(120)
     else:
         print("Update not found.")
-        time.sleep(50)
+        time.sleep(5)
 
 checkUpdate()
