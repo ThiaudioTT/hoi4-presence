@@ -6,6 +6,8 @@ import psutil
 import sys
 import glob
 
+# FLAGS FOR THE COMPILER: --name hoi4Presence --noconsole --onefile
+
 try:
    client_id = '1021549599732809820'
    RPC = Presence(client_id)  # Initialize the Presence class
