@@ -43,7 +43,7 @@ Searching for a good [issue](https://github.com/ThiaudioTT/hoi4-presence/labels/
 
 ## how the presence works?
 
-It uses the autosave to get data. So, spend one month in the game to update the presence.
+It uses the saves to get data. So, spend one month in the game or save the game to update the presence.
 
 TODO...
 
