@@ -1,18 +1,30 @@
+# COMPILE THIS USING --onefile
 import semantic_version
 import time
 import urllib.request
 import time
 import json
 import sys
+import os
 
 def checkUpdate():
     try:
-        localVersion = open("version.json", "r")
+        # picking the current dir
+        version_path = ""
+        if getattr(sys, 'frozen', False):
+            version_path = os.path.dirname(sys.executable)
+        else:
+            version_path = os.path.dirname(os.path.abspath(__file__))
+
+        localVersion = open(version_path + "/version.json", "r") # use something like .resolve() or clean code
         localVersion = json.load(localVersion)
+
+        print("\nLocal version: ")
         print(localVersion)
     except Exception as e:
         print(e)
         print("Error while reading version.json")
+        time.sleep(5)
         sys.exit(1)
 
     URL = urllib.request.urlopen("https://raw.githubusercontent.com/ThiaudioTT/hoi4-presence/main/version.json")
@@ -25,5 +37,6 @@ def checkUpdate():
         time.sleep(120)
     else:
         print("Update not found.")
+        time.sleep(5)
 
 checkUpdate()

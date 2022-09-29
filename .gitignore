@@ -1,5 +1,7 @@
 *.hoi4
 src/discordRPC/dist/
 src/discordRPC/build/
+src/dist/
+src/build/
 *.spec
 *.exe
