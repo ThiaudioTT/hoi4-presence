@@ -1,10 +1,10 @@
 from pypresence import Presence
-from pathlib import Path
 import re
 import time
 import os
 import psutil
 import sys
+import glob
 
 try:
    client_id = '1021549599732809820'
@@ -29,22 +29,31 @@ gameRunning = True
 while gameRunning:  # The presence will stay on as long as the program is running, so use some lib
    try:
 
-      path = Path(__file__).parent.parent / "save games/autosave.hoi4" # wont work if you compile in one single file | use .resolve()?
-      dateFile = int(os.path.getmtime(path))
+      path = "" # path to the saves
+      if getattr(sys, 'frozen', False):
+         path = os.path.dirname(sys.executable)
+      else:
+         path = os.path.dirname(os.path.abspath(__file__))
+      
+      path = os.path.abspath(path + "/../" + "/save games/*.hoi4")
+
+      # getting the last modified save file
+      listSaves = glob.glob(path)
+      lastSavePath = max(listSaves, key=os.path.getmtime)
+      print(lastSavePath)
+
+      dateFile = int(os.path.getmtime(lastSavePath))
       now = int(time.time())
       saveNew = False
-
-      # TODO: you can use any file, only check if is new.
-      if (now - dateFile) <= 120: # calc to see if autosave is recently (2 min recently)
+      if (now - dateFile) <= 120: # calc to see if save is recently (2 min recently)
          saveNew = True
       else:
          saveNew = False
-
       
       if(saveNew): 
          # putting this in a function might be good.
 
-         save = open(path, "r")
+         save = open(lastSavePath, "r")
          data = ""
          for i in range(5):
             data += save.readline()
@@ -104,6 +113,7 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
          print(data) # debug
    except Exception as e:
       print(e)
+      time.sleep(5)
    
    time.sleep(30) #Wait a wee bit
    gameRunning = False
