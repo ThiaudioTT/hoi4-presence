@@ -4,6 +4,8 @@ import time
 import sys
 import json
 from pathlib import Path
+# TODO: remove pathlib dependency to compile in onefile.
+# TODO: verify if all files are included in /dist/ folder. (like version.json)
 
 print("This script will install the hoi4-presence in your game/save path\nPress enter to continue...")
 input()
@@ -43,7 +45,7 @@ try:
     print(documents)
     print(documents + "\\hoi4Presence")
 
-    source = Path(__file__).parent.resolve() / "discordRPC/dist/hoi4Presence"
+    source = Path(__file__).parent.resolve() / "discordRPC/dist"
     shutil.copytree(source, documents + "\\hoi4Presence")
 except Exception as e:
     print(e)
