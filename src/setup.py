@@ -77,7 +77,7 @@ except Exception as e:
     CheckPathExists = False
     while CheckPathExists == False: 
         gameFolder = input("Can't find the game path, please enter the path manually: ")
-        if os.path.exists(gameFolder) == True and os.path.exists(gameFodler+"hoi4.exe"): 
+        if os.path.exists(gameFolder) == True and (os.path.exists(gameFolder+"hoi4.exe") == True or os.path.exists(gameFolder+"\\hoi4.exe") == True): 
             CheckPathExists = True
                
 
