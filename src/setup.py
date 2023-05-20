@@ -25,7 +25,7 @@ input()
 # 6 - ask the user delete the folder and exit
 
 
-# 1 
+# # 1 
 documents = os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV"
 try:
     os.listdir(documents)
@@ -74,9 +74,12 @@ try:
 except Exception as e:
     print(e)
     # 3.2
-    print("Can't find the game path, please enter the path manually: ")
-    gameFolder = input() # TODO: Check if the path is valid
-
+    CheckPathExists = False
+    while CheckPathExists == False: 
+        gameFolder = input("Can't find the game path, please enter the path manually: ")
+        if os.path.exists(gameFolder) == True and os.path.exists(gameFodler+"hoi4.exe"): 
+            CheckPathExists = True
+               
 
 #   moving...
 try:
