@@ -1,0 +1,14 @@
+HOI4txt
+player="GER"
+ideology=fascism
+date="1936.1.1.12"
+difficulty="normal"
+version="Avalanche v1.12.13.fbdd (b721)"
+tutorial=no
+player_countries={
+	GER={
+		user="Aaawhn zé da manga"
+		country_leader=yes
+		id=1
+	}
+}
