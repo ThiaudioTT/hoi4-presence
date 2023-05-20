@@ -4,6 +4,8 @@ Thank you so much to consider contributing to this project!
 
 When contributing to this repository, please first discuss the change you wish to make via issue or any other method before making a change.
 
+I separated good first issues with the label [good first issue](https://github.com/ThiaudioTT/hoi4-presence/labels/good%20first%20issue) to help you to start contributing to this project. If you want to contribute with something else, please open an issue to discuss it or search for an issue that is already open in [Issues](https://github.com/ThiaudioTT/hoi4-presence/issues).
+
 ## Getting Started
 
 1. Fork the repository on GitHub
