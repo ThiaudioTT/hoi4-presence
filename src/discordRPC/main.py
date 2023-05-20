@@ -47,6 +47,7 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
       dateFile = int(os.path.getmtime(lastSavePath))
       now = int(time.time())
       saveNew = (now - dateFile) <= 120 # calc to see if save is recently (2 min recently)
+      # saveNew = True # for testing
       
       if(saveNew): 
          print("New save found!")
