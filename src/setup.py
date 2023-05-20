@@ -27,6 +27,13 @@ input()
 
 # 1 
 documents = os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV"
+
+if(os.path.exists(documents)):
+    pass
+else:
+    documents = ""
+    input("The path you've entered is incorrect! Please update the path", documents)
+    
 try:
     os.listdir(documents)
 except Exception as e:
@@ -69,6 +76,13 @@ except Exception as e:
 
 # 3
 gameFolder = os.environ['PROGRAMFILES(X86)'] + "\\Steam\\steamapps\\common\\Hearts of Iron IV"
+
+if(os.path.exists(gameFolder)):
+    pass
+else:
+    gameFolder = ""
+    input("The path you've entered is incorrect! Please update the path", gameFolder)
+    
 try:
     os.listdir(gameFolder)
 except Exception as e:
