@@ -5,6 +5,7 @@ import os
 import psutil
 import sys
 import glob
+import countries
 
 # FLAGS FOR THE COMPILER: --name hoi4Presence --noconsole --onefile
 
@@ -65,46 +66,17 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
          # ['GER', 'fascism', '1936.2.1.2', 'normal']
 
          # defining the country
-         country = data[0]
-         flag = "" # to be set later
+         country = countries.getCountry(data[0]) # get the country name from the country code
          ideology = data[1]
          year = data[2][:4]
          mode = data[3]
 
-         match country:
-            case "GER":
-               country = "Germany"
-               flag = "german_reich"
-            case "ITA":
-               country = "Italy"
-               flag = "italy"
-            case "JAP":
-               country = "Japan"
-               flag = "japan"
-            case "SOV":
-               country = "Soviet Union"
-               flag = "soviet_union"
-            case "POL":
-               country = "Poland"
-               flag = "poland"
-            case "FRA":
-               country = "France"
-               flag = "france"
-            case "USA":
-               country = "United States"
-               flag = "united_states"
-            case "ENG":
-               country = "United Kingdom"
-               flag = "united_kingdom"
-            case other:
-               country = data[1]
-               flag = "hoi4-logo"
          
          # hint: use discord developer portal
          RPC.update(
             state="Year: " + year,
-            details="Playing as " + country,
-            large_image=flag,
+            details="Playing as " + country.name,
+            large_image=country.flag,
             large_text="Ideology: " + ideology,
             small_image="hoi4-logo",
             small_text="In " + mode + " mode",
