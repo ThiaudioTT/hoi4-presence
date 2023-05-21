@@ -32,8 +32,12 @@ try:
 except Exception as e:
     print(e)
     # 1.2
-    print("Can't find the game path, please enter the path manually: ")
-    documents = input() # TODO: Check if the path is valid
+    CheckDocPathExists = False
+    while not CheckDocPathExists: 
+        documents = input("Can't find the game path, please enter the path manually: ")
+        if os.path.exists(documents): 
+            CheckDocPathExists = True
+
 
  #moving...
 try:
@@ -75,9 +79,9 @@ except Exception as e:
     print(e)
     # 3.2
     CheckPathExists = False
-    while CheckPathExists == False: 
+    while not CheckPathExists: 
         gameFolder = input("Can't find the game path, please enter the path manually: ")
-        if os.path.exists(gameFolder) == True and (os.path.exists(gameFolder+"hoi4.exe") == True or os.path.exists(gameFolder+"\\hoi4.exe") == True): 
+        if os.path.exists(gameFolder) and (os.path.exists(gameFolder+"hoi4.exe") or os.path.exists(gameFolder+"\\hoi4.exe")): 
             CheckPathExists = True
                
 
