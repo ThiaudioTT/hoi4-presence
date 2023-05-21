@@ -19,7 +19,7 @@ try:
    RPC.update(
       details="In menus...",
       large_image="hoi4-logo", # put this in a var?
-      large_text="thiaudiott/hoi4-presence on Github!",
+      large_text="Real-Raymond/hoi4-presence on Github!",
       start=playTime
    )
 except Exception as e:
