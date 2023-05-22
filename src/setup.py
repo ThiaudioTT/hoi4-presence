@@ -27,13 +27,18 @@ input()
 
 # 1 
 documents = os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV"
-try:
-    os.listdir(documents)
-except Exception as e:
-    print(e)
-    # 1.2
-    print("Can't find the game path, please enter the path manually: ")
-    documents = input() # TODO: Check if the path is valid
+while True:
+    try:
+        if 'settings.txt' not in os.listdir(documents):
+            raise Exception(f"Could not find settings.txt in '{documents}'")
+        else:
+            print('Game storage directory found')
+            break
+    except Exception as e:
+        print(e)
+        errorType = 'the game storage path' if str(e).startswith('[WinError 3]') else 'settings.txt'
+        # 1.2
+        documents = input(f"Can't find {errorType}, please enter the path manually: ")
 
  #moving...
 try:
