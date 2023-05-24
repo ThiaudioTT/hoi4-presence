@@ -74,13 +74,18 @@ except Exception as e:
 
 # 3
 gameFolder = os.environ['PROGRAMFILES(X86)'] + "\\Steam\\steamapps\\common\\Hearts of Iron IV"
-try:
-    os.listdir(gameFolder)
-except Exception as e:
-    print(e)
-    # 3.2
-    print("Can't find the game path, please enter the path manually: ")
-    gameFolder = input() # TODO: Check if the path is valid
+While True:
+    try:
+        if "Hearts of Iron IV.exe" not in os.listdir(gameFolder)
+            raise Exception(f"Could not find 'Hearts of Iron IV.exe' in '{gameFolder}'")
+        else:
+            print('Game directory found')
+            break
+    except Exception as e:
+        print(e)
+        errorType = "the game folder path" if str(e).startswith('[WinError 3]') else "'Hearts of Iron IV.exe'"
+        # 3.2
+        gameFolder = input(f"Can't find {errorType}, please enter the path manually: ")
 
 
 #   moving...
