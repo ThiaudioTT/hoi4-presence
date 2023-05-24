@@ -30,13 +30,13 @@ documents = os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Heart
 while True:
     try:
         if 'settings.txt' not in os.listdir(documents):
-            raise Exception(f"Could not find settings.txt in '{documents}'")
+            raise Exception(f"Could not find 'settings.txt' in '{documents}'")
         else:
-            print('Game storage directory found')
+            print('Documents directory found')
             break
     except Exception as e:
         print(e)
-        errorType = 'the game storage path' if str(e).startswith('[WinError 3]') else 'settings.txt'
+        errorType = 'documents path' if str(e).startswith('[WinError 3]') else "'settings.txt'"
         # 1.2
         documents = input(f"Can't find {errorType}, please enter the path manually: ")
 
@@ -76,14 +76,14 @@ except Exception as e:
 gameFolder = os.environ['PROGRAMFILES(X86)'] + "\\Steam\\steamapps\\common\\Hearts of Iron IV"
 while True:
     try:
-        if "Hearts of Iron IV.exe" not in os.listdir(gameFolder):
-            raise Exception(f"Could not find 'Hearts of Iron IV.exe' in '{gameFolder}'")
+        if "hoi4.exe" not in os.listdir(gameFolder):
+            raise Exception(f"Could not find 'hoi4.exe' in '{gameFolder}'")
         else:
             print('Game directory found')
             break
     except Exception as e:
         print(e)
-        errorType = "the game folder path" if str(e).startswith('[WinError 3]') else "'Hearts of Iron IV.exe'"
+        errorType = "game folder path" if str(e).startswith('[WinError 3]') else "'hoi4.exe'"
         # 3.2
         gameFolder = input(f"Can't find {errorType}, please enter the path manually: ")
 
