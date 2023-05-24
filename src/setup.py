@@ -74,9 +74,9 @@ except Exception as e:
 
 # 3
 gameFolder = os.environ['PROGRAMFILES(X86)'] + "\\Steam\\steamapps\\common\\Hearts of Iron IV"
-While True:
+while True:
     try:
-        if "Hearts of Iron IV.exe" not in os.listdir(gameFolder)
+        if "Hearts of Iron IV.exe" not in os.listdir(gameFolder):
             raise Exception(f"Could not find 'Hearts of Iron IV.exe' in '{gameFolder}'")
         else:
             print('Game directory found')
