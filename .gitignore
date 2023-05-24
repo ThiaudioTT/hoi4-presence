@@ -5,3 +5,4 @@ src/dist/
 src/build/
 *.spec
 *.exe
+__pycache__/
