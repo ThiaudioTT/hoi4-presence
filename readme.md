@@ -37,9 +37,9 @@ Found a bug? Submit it in:
 
 ## Contributing
 
-Feel free to contribute! Open a [pull request](https://github.com/ThiaudioTT/hoi4-presence/pulls).
+Feel free to contribute! I will be happy to see your pull request.
 
-Searching for a good [issue](https://github.com/ThiaudioTT/hoi4-presence/labels/good%20first%20issue) to start?
+First, read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ## how the presence works?
 
