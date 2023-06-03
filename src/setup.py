@@ -40,6 +40,25 @@ while True:
         # 1.2
         documents = input(f"Can't find {errorType}, please enter the path manually: ")
 
+# updates the bat file:
+print("Updating the runRPC.bat...\n")
+if documents != os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV":
+    try:
+        batchPath = ".\\batch\\runRPC.bat"
+        with open(batchPath, 'r') as file:
+            lines = file.readlines()
+
+        # Modify the first line
+        lines[0] = 'set "documentsPath=' + documents + '"\n'
+
+        with open(batchPath, 'w') as file:
+            file.writelines(lines)
+    except Exception as e:
+        print(e)
+        print("Can't change the runRPC.bat\nExiting...")
+        time.sleep(10)
+        sys.exit()
+
  #moving...
 try:
     if(os.path.exists(documents + "\\hoi4Presence")):
