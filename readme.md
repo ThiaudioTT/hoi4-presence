@@ -29,18 +29,6 @@ change `"exePath": "runRPC.exe",` to
 
 You can delete all the other files originated from discord presence.
 
-## Submiting an issue
-
-Found a bug? Submit it in:
-
-[Issues](https://github.com/ThiaudioTT/hoi4-presence/issues)
-
-## Contributing
-
-Feel free to contribute! Open a [pull request](https://github.com/ThiaudioTT/hoi4-presence/pulls).
-
-Searching for a good [issue](https://github.com/ThiaudioTT/hoi4-presence/labels/good%20first%20issue) to start?
-
 ## how the presence works?
 
 It uses the saves to get data. So, spend one month in the game or save the game to update the presence.
