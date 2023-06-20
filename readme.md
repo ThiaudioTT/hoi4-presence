@@ -6,7 +6,7 @@
 
 Download the lastest presence from:
 
-[Releases](https://github.com/ThiaudioTT/hoi4-presence/releases)
+[Releases](https://github.com/Real-Raymond/hoi4-presence/releases)
 
 It's named as `hoi4-presence-vVERSION.zip`
 
