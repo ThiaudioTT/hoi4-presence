@@ -3,9 +3,6 @@ import shutil
 import time
 import sys
 import json
-from pathlib import Path
-# TODO: remove pathlib dependency to compile in onefile.
-# TODO: verify if all files are included in /dist/ folder. (like version.json)
 
 print("This script will install the hoi4-presence in your game/save path\nPress enter to continue...")
 input()
@@ -13,6 +10,7 @@ input()
 # 1 - Move hoi4Presence to documents/paradox/hearts of iron/ WITH CURRENTLY version.json and uninstaller.py
     # 1.1 - If can't move, exit. 
     # 1.2 - If can't search, ask the user where is the path
+    # 1.3 - Verify if all required files are in /dist/ folder
 # 2 - replace settings.txt .replace('save_as_binary=yes', 'save_as_binary=no')
 # 3 - Move runRPC.bat to the game folder, usually C:\Program Files (x86)\Steam\steamapps\common\Hearts of Iron IV\
     # 3.1 - If can't move, exit.
@@ -24,6 +22,46 @@ input()
 # 5 - Success message (or failed)
 # 6 - ask the user delete the folder and exit
 
+# Verifying if all required files are included in /dist/ folder
+try:
+
+    print("Verifying required files...")
+
+    source = os.path.join(os.path.abspath(os.curdir), "discordRPC\\dist")
+
+    # If any files are needed within the /dist/ folder, add them here
+    requiredFiles = ("checkupdate.exe", "hoi4Presence.exe", "version.json")
+    filesNotFound = []
+
+    for file in requiredFiles:
+
+        if file not in os.listdir(source):
+
+            filesNotFound.append(file)
+    
+    # If there is an item in filesNotFound
+    if filesNotFound:
+        raise Exception("filesNotFound")
+
+    print("All required files are valid!")
+
+except Exception as e:
+
+    if str(e).startswith("[WinError 3]"):
+
+        print(f"Could not find {source}")
+
+    elif str(e) == "filesNotFound":
+
+        print(f"The following files were not found in {source}:\n\n{', '.join(filesNotFound)}\n")
+    else:
+
+        print(e)
+
+    print('\nExiting...')
+
+    time.sleep(10)
+    sys.exit()
 
 # 1 
 documents = os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV"
@@ -69,7 +107,6 @@ try:
     print(documents)
     print(documents + "\\hoi4Presence")
 
-    source = Path(__file__).parent.resolve() / "discordRPC/dist"
     shutil.copytree(source, documents + "\\hoi4Presence")
 except Exception as e:
     print(e)
@@ -112,7 +149,7 @@ try:
     print("Moving runRPC.bat to the game folder...")
     print(gameFolder)
 
-    file = Path(__file__).parent.resolve() / "batch/runRPC.bat"
+    file = os.path.join(os.path.abspath(os.curdir), "batch\\runRPC.bat")
     shutil.copyfile(file, gameFolder + "\\runRPC.bat")
 except Exception as e:
     print(e)
