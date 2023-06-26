@@ -10,7 +10,6 @@ input()
 # 1 - Move hoi4Presence to documents/paradox/hearts of iron/ WITH CURRENTLY version.json and uninstaller.py
     # 1.1 - If can't move, exit. 
     # 1.2 - If can't search, ask the user where is the path
-    # 1.3 - Verify if all required files are in /dist/ folder
 # 2 - replace settings.txt .replace('save_as_binary=yes', 'save_as_binary=no')
 # 3 - Move runRPC.bat to the game folder, usually C:\Program Files (x86)\Steam\steamapps\common\Hearts of Iron IV\
     # 3.1 - If can't move, exit.
