@@ -37,7 +37,6 @@ try:
         if file not in os.listdir(source):
 
             filesNotFound.append(file)
-    
     # If there is an item in filesNotFound
     if filesNotFound:
         raise Exception("filesNotFound")
