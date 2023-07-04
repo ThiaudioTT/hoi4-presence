@@ -61,13 +61,13 @@ except Exception as e:
     if str(e).endswith("dist'"):
 
         print(f"Error: Could not find 'dist' directory\n{source}")
-    
+
     elif str(e).endswith("batch'"):
 
         print(f"Error: Could not find 'batch' directory\n{batchFolderPath}")
 
     elif str(e) == "filesNotFound":
-        
+
         if batchNotFound:
             print(f"\nError: 'runRPC.bat' was not found in {batchFolderPath}\n\n")
 
