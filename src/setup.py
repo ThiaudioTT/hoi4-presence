@@ -21,37 +21,59 @@ input()
 # 5 - Success message (or failed)
 # 6 - ask the user delete the folder and exit
 
-# Verifying if all required files are included in /dist/ folder
+# Verifying if all required files are included in /dist/ and /batch/
 try:
 
     print("Verifying required files...")
 
     source = os.path.join(os.path.abspath(os.curdir), "discordRPC\\dist")
 
+    batchFolderPath = os.path.join(os.path.abspath(os.curdir), "batch")
+
+    batchPath = os.path.join(batchFolderPath, "runRPC.bat")
+
+    # Testing if the batch folder exists, will raise an exception if it doesn't
+    os.listdir(batchFolderPath)
+
+    # Checking if runRPC.bat exists
+    batchNotFound = not os.path.exists(batchPath)
+
     # If any files are needed within the /dist/ folder, add them here
     requiredFiles = ("checkupdate.exe", "hoi4Presence.exe", "version.json")
     filesNotFound = []
 
-    for file in requiredFiles:
+    # Checking if the required files are in /dist/
+    with os.listdir(source) as distContents:
+        for file in requiredFiles:
 
-        if file not in os.listdir(source):
+            if file not in distContents:
 
-            filesNotFound.append(file)
-    # If there is an item in filesNotFound
-    if filesNotFound:
+                filesNotFound.append(file)
+
+    # If there is an item in filesNotFound or batchNotFound returns true
+    if batchNotFound or filesNotFound:
         raise Exception("filesNotFound")
 
     print("All required files are valid!")
 
 except Exception as e:
 
-    if str(e).startswith("[WinError 3]"):
+    if str(e).endswith("dist'"):
 
-        print(f"Could not find {source}")
+        print(f"Error: Could not find 'dist' directory\n{source}")
+    
+    elif str(e).endswith("batch'"):
+
+        print(f"Error: Could not find 'batch' directory\n{batchFolderPath}")
 
     elif str(e) == "filesNotFound":
+        
+        if batchNotFound:
+            print(f"\nError: 'runRPC.bat' was not found in {batchFolderPath}\n\n")
 
-        print(f"The following files were not found in {source}:\n\n{', '.join(filesNotFound)}\n")
+        if filesNotFound:
+            print(f"\nError: The following files were not found in {source}:\n\n{', '.join(filesNotFound)}\n")
+
     else:
 
         print(e)
@@ -80,7 +102,7 @@ while True:
 print("Updating the runRPC.bat...\n")
 if documents != os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV":
     try:
-        batchPath = ".\\batch\\runRPC.bat"
+    
         with open(batchPath, 'r') as file:
             lines = file.readlines()
 
