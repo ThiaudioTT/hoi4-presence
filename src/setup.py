@@ -33,12 +33,11 @@ try:
     filesNotFound = []
 
     # Checking if the required files are in /dist/
-    with os.listdir(source) as distContents:
-        for file in requiredFiles:
+    for file in os.listdir(source):
 
-            if file not in distContents:
+        if file not in requiredFiles:
 
-                filesNotFound.append(file)
+            filesNotFound.append(file)
 
     # If there is an item in filesNotFound
     if filesNotFound:
@@ -58,7 +57,7 @@ except Exception as e:
 
     else:
 
-        print(e)
+        print(f'Error: {e}')
 
     print('\nExiting...')
 
