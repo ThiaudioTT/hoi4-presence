@@ -3,9 +3,6 @@ import shutil
 import time
 import sys
 import json
-from pathlib import Path
-# TODO: remove pathlib dependency to compile in onefile.
-# TODO: verify if all files are included in /dist/ folder. (like version.json)
 
 print("This script will install the hoi4-presence in your game/save path\nPress enter to continue...")
 input()
@@ -24,6 +21,48 @@ input()
 # 5 - Success message (or failed)
 # 6 - ask the user delete the folder and exit
 
+# Verifying if all required files are included in /dist/
+try:
+
+    print("Verifying required files...")
+
+    source = os.path.join(os.path.abspath(os.curdir), "discordRPC\\dist")
+
+    # If any files are needed within the /dist/ folder, add them here
+    requiredFiles = ("checkupdate.exe", "hoi4Presence.exe", "version.json", "runRPC.bat")
+    filesNotFound = []
+
+    # Checking if the required files are in /dist/
+    for file in os.listdir(source):
+
+        if file not in requiredFiles:
+
+            filesNotFound.append(file)
+
+    # If there is an item in filesNotFound
+    if filesNotFound:
+        raise Exception("filesNotFound")
+
+    print("All required files are valid!")
+
+except Exception as e:
+
+    if str(e).endswith("dist'"):
+
+        print(f"Error: Could not find 'dist' directory\n{source}")
+
+    elif str(e) == "filesNotFound":
+
+        print(f"\nError: The following files were not found in {source}:\n\n{', '.join(filesNotFound)}\n")
+
+    else:
+
+        print(f'Error: {e}')
+
+    print('\nExiting...')
+
+    time.sleep(10)
+    sys.exit()
 
 # 1 
 documents = os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV"
@@ -44,7 +83,7 @@ while True:
 print("Updating the runRPC.bat...\n")
 if documents != os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV":
     try:
-        batchPath = ".\\batch\\runRPC.bat"
+        batchPath = os.path.join(source, "runRPC.bat")
         with open(batchPath, 'r') as file:
             lines = file.readlines()
 
@@ -69,7 +108,6 @@ try:
     print(documents)
     print(documents + "\\hoi4Presence")
 
-    source = Path(__file__).parent.resolve() / "discordRPC/dist"
     shutil.copytree(source, documents + "\\hoi4Presence")
 except Exception as e:
     print(e)
@@ -112,8 +150,7 @@ try:
     print("Moving runRPC.bat to the game folder...")
     print(gameFolder)
 
-    file = Path(__file__).parent.resolve() / "batch/runRPC.bat"
-    shutil.copyfile(file, gameFolder + "\\runRPC.bat")
+    shutil.copyfile(batchPath, gameFolder + "\\runRPC.bat")
 except Exception as e:
     print(e)
     print("Can't move the runRPC.bat to the game folder\nExiting...")
