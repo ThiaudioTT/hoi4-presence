@@ -6,20 +6,23 @@ class Country:
       self.flag = flag
 
 def getFlag(flag: str) -> str:
-    """Gets the corresponding image of said country using an online JSON file that's located on the repo."""
+   """Gets the corresponding image of said country using an online JSON file that's located on the repo."""      
 
-    try:
+   try:
+
+      if flag == "other":
+         raise Exception("Other country found, using default image")
 
       JSON = requests.get("https://raw.githubusercontent.com/ThiaudioTT/hoi4-presence/main/src/discordRPC/countries.json")
 
       return JSON.json()[flag]
 
-    except Exception as e:
+   except Exception as e:
 
       print(e)
-        
+         
       # Set a default value for this in case something goes wrong
-      return flag
+      return "hoi4-logo"
 
 def getCountry(country: str) -> Country:
    """Returns a Country object from the country code."""
