@@ -6,7 +6,6 @@ import psutil
 import sys
 import glob
 import countries
-from requestflag import getFlag
 
 # FLAGS FOR THE COMPILER: --name hoi4Presence --noconsole --onefile
 
@@ -75,7 +74,7 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
          RPC.update(
             state="Year: " + year,
             details="Playing as " + country.name,
-            large_image=getFlag(country.flag),
+            large_image=country.flag,
             large_text="Ideology: " + ideology,
             small_image="hoi4-logo",
             small_text="In " + mode + " mode",

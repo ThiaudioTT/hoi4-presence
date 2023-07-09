@@ -1,7 +1,27 @@
+import requests
+
 class Country:
    def __init__(self, name: str, flag: str):
       self.name = name
       self.flag = flag
+
+def getFlag(flag: str) -> str:
+
+    ''' 
+    Gets the corresponding image of said country using an online JSON file that's located on the repo.
+    '''
+
+    try:
+
+      JSON = requests.get("https://raw.githubusercontent.com/ThiaudioTT/hoi4-presence/main/src/discordRPC/countries.json")
+
+      return JSON.json()[flag]
+
+    except Exception as e:
+
+        print(e)
+
+        return flag
 
 def getCountry(country: str) -> Country:
    """Returns a Country object from the country code."""
@@ -15,28 +35,28 @@ def getCountry(country: str) -> Country:
    match country:
       case "GER":
          country = "Germany"
-         flag = "german_reich"
+         flag = getFlag("german_reich")
       case "ITA":
          country = "Italy"
-         flag = "italy"
+         flag = getFlag("italy")
       case "JAP":
          country = "Japan"
-         flag = "japan"
+         flag = getFlag("japan")
       case "SOV":
          country = "Soviet Union"
-         flag = "soviet_union"
+         flag = getFlag("soviet_union")
       case "POL":
          country = "Poland"
-         flag = "poland"
+         flag = getFlag("poland")
       case "FRA":
          country = "France"
-         flag = "france"
+         flag = getFlag("france")
       case "USA":
          country = "United States"
-         flag = "united_states"
+         flag = getFlag("united_states")
       case "ENG":
          country = "United Kingdom"
-         flag = "united_kingdom"
+         flag = getFlag("united_kingdom")
       case other:
          # country = country ||| others countries
          flag = "hoi4-logo"
