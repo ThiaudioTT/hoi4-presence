@@ -1,19 +1,19 @@
 {
-    "german_reich" : "link",
+    "Germany" : "link",
 
-    "italy" : "link",
+    "Italy" : "link",
 
-    "japan" : "link",
+    "Japan" : "link",
 
-    "soviet_union" : "link",
+    "Soviet Union" : "link",
 
-    "poland" : "link",
+    "Poland" : "link",
 
     "France" : "link",
 
-    "united_states" : "link",
+    "United States" : "link",
 
-    "united_kingdom" : "link",
+    "United Kingdom" : "link",
 
-    "hoi4-logo" : "link"
+    "other" : "link"
 }
