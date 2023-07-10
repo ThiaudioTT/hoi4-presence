@@ -2,6 +2,23 @@ class Country:
    def __init__(self, name: str, flag: str):
       self.name = name
       self.flag = flag
+   
+   def __str__(self) -> str:
+      return f"{self.name}, {self.flag}"
+
+# List of countries, add more if you want
+countries = {
+
+   "GER" : ("Germany", "link"),
+   "ITA" : ("Italy", "link"),
+   "JAP" : ("Japan", "link"),
+   "SOV" : ("Soviet Union", "link"),
+   "POL" : ("Poland", "link"),
+   "FRA" : ("France", "link"),
+   "USA" : ("United States", "link"),
+   "ENG" : ("United Kingdom", "link")
+
+}
 
 def getCountry(country: str) -> Country:
    """Returns a Country object from the country code."""
@@ -9,36 +26,12 @@ def getCountry(country: str) -> Country:
       raise ValueError("Country code cannot be empty.")
    
    country = country.upper()
-   flag = ""
 
-   # List of coutnries, add more if you want
-   match country:
-      case "GER":
-         country = "Germany"
-         flag = "german_reich"
-      case "ITA":
-         country = "Italy"
-         flag = "italy"
-      case "JAP":
-         country = "Japan"
-         flag = "japan"
-      case "SOV":
-         country = "Soviet Union"
-         flag = "soviet_union"
-      case "POL":
-         country = "Poland"
-         flag = "poland"
-      case "FRA":
-         country = "France"
-         flag = "france"
-      case "USA":
-         country = "United States"
-         flag = "united_states"
-      case "ENG":
-         country = "United Kingdom"
-         flag = "united_kingdom"
-      case other:
-         # country = country ||| others countries
-         flag = "hoi4-logo"
+   # This is raised when there is a country that isn't in the countries dictionary
+   if countries.get(country) is None:
+      countries[country] = (country, "hoi4-icon")
+   
+   countryName = countries[country][0]
+   flag = countries[country][1]
 
-   return Country(country, flag)
+   return Country(countryName, flag)
