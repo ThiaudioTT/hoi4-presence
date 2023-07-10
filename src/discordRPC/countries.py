@@ -30,7 +30,7 @@ def getCountry(country: str) -> Country:
    # This is raised when there is a country that isn't in the countries dictionary
    if countries.get(country) is None:
       countries[country] = (country, "hoi4-icon")
-   
+
    countryName = countries[country][0]
    flag = countries[country][1]
 
