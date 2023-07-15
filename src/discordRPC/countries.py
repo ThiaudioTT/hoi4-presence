@@ -142,7 +142,7 @@ countries: dict[str, tuple[str, str]] = {
    "BEG" : ("Benishangul-Gumuz Nation", "https://hoi4.paradoxwikis.com/images/9/9e/Bangladesh.png"),
    "BOS" : ("Bosnia", "https://i.imgur.com/1EzEwR4.png"),
    "BOT" : ("Botswana", "https://hoi4.paradoxwikis.com/images/1/1e/Botswana.png"),
-   "BAS" : ("British Antilles", ""), # Missing
+   "BAS" : ("British Antilles", "https://hoi4.paradoxwikis.com/images/2/29/United_Kingdom.png"), # Using UK Flag
    "BRI" : ("Brittany", "https://hoi4.paradoxwikis.com/images/1/1c/Brittany.png"),
    "BUK" : ("Bukhara", "https://hoi4.paradoxwikis.com/images/1/14/Bukharan_Jadidist_Republic.png"),
    "BRM" : ("Burma", "https://hoi4.paradoxwikis.com/images/7/78/Burma.png"),
@@ -150,25 +150,25 @@ countries: dict[str, tuple[str, str]] = {
    "BYA" : ("Buryatia", "https://hoi4.paradoxwikis.com/images/2/2c/Republic_of_Buryatia.png"),
    "CAM" : ("Cambodia", "https://hoi4.paradoxwikis.com/images/9/94/Republic_of_Cambodia.png"),
    "CMR" : ("Cameroon", "https://hoi4.paradoxwikis.com/images/9/92/Cameroon.png"),
-   "CAT" : ("Catalonia", "https://hoi4.paradoxwikis.com/images/c/ca/Catalonian_Free_Republic.png"), # Small img
-   "CAY" : ("Cayenne", "link"), # Missing
+   "CAT" : ("Catalonia", "https://i.imgur.com/qucdBrZ.png"),
+   "CAY" : ("Cayenne", "https://i.imgur.com/vH2hzqz.png"),
    "CAR" : ("Central African Republic", "https://hoi4.paradoxwikis.com/images/d/d3/Central_African_Republic.png"),
    "CHA" : ("Chad", "https://hoi4.paradoxwikis.com/images/7/79/Chad.png"),
-   "CIN" : ("Chechnya Ingushetia", ""), # Missing
-   "CKK" : ("Chukotka", "link"), # Missing
+   "CIN" : ("Chechen-Ingush Republic", "https://i.imgur.com/CSWCRN2.jpeg"),
+   "CKK" : ("Chukotka", "https://i.imgur.com/ftpUAMw.png"),
    "CHU" : ("Chuvashia", "https://hoi4.paradoxwikis.com/images/f/fa/Chuvashia.png"),
-   "COR" : ("Corsica", "https://hoi4.paradoxwikis.com/images/3/30/Corsican_Republic.png"), # Small img
+   "COR" : ("Corsica", "https://i.imgur.com/0y63AmO.png"),
    "CSA" : ("Confederacy of American States", "https://hoi4.paradoxwikis.com/images/0/0a/Confederacy_of_American_States.png"),
    "RCG" : ("Congo-Brazzaville", "https://hoi4.paradoxwikis.com/images/f/fa/Congo-Brazzaville.png"),
    "IVO" : ("Côte d'Ivoire", "https://hoi4.paradoxwikis.com/images/7/7f/C%C3%B4te_d%27Ivoire.png"),
    "CRI" : ("Crimea", "https://hoi4.paradoxwikis.com/images/6/64/Crimea.png"),
    "CRO" : ("Croatia", "https://hoi4.paradoxwikis.com/images/b/bb/Independent_State_of_Croatia.png"),
    "CYP" : ("Cyprus", "https://hoi4.paradoxwikis.com/images/2/2b/Republic_of_Cyprus.png"),
-   "DAG" : ("Dagestan", ""), # Missing
+   "DAG" : ("Dagestan", "https://i.imgur.com/cxnthyw.png"),
    "DAH" : ("Dahomey", "https://hoi4.paradoxwikis.com/images/f/f1/Dahomey.png"),
    "DNZ" : ("Danzig", "https://hoi4.paradoxwikis.com/images/d/d8/Free_City_of_Danzig.png"),
    "DJI" : ("Djibouti", "https://hoi4.paradoxwikis.com/images/e/e2/Djibouti.png"),
-   "DON" : ("Don Host", "https://hoi4.paradoxwikis.com/images/b/bc/Don_Host.png"), # Small img
+   "DON" : ("Don Host", "https://i.imgur.com/DjrdiB4.png"),
    "AOI" : ("Italian State of East Africa", "https://hoi4.paradoxwikis.com/images/2/22/Italian_State_of_East_Africa.png"),
    "DDR" : ("East Germany", "https://hoi4.paradoxwikis.com/images/f/f2/East_Germany.png"),
    "EGY" : ("Kingdom of Egypt", "https://hoi4.paradoxwikis.com/images/7/7b/Kingdom_of_Egypt.png"),
@@ -181,11 +181,11 @@ countries: dict[str, tuple[str, str]] = {
    "GAM" : ("Gambia", "https://hoi4.paradoxwikis.com/images/a/a0/The_Gambia.png"),
    "GEO" : ("Georgia", "https://hoi4.paradoxwikis.com/images/d/d1/Republic_of_Georgia.png"),
    "GHA" : ("Ghana", "https://hoi4.paradoxwikis.com/images/8/88/Ghana.png"),
-   "GDL" : ("Guadeloupe", ""), # Missing
+   "GDL" : ("Guadeloupe", "https://i.imgur.com/n1UPF8e.png"),
    "GNA" : ("Guinea", "https://hoi4.paradoxwikis.com/images/b/b2/Guinea.png"),
    "GNB" : ("Guinea-Bissau", "https://hoi4.paradoxwikis.com/images/6/67/Guinea-Bissau.png"),
-   "GYA" : ("Guyana", "https://i.imgur.com/loNcNcI.png"), # Small img
-   "HAR" : ("Harar", "https://hoi4.paradoxwikis.com/images/9/90/Emirate_of_Harar.png"), # Small img
+   "GYA" : ("Guyana", "https://i.imgur.com/oH9tyzR.png"),
+   "HAR" : ("Harar", "https://i.imgur.com/v08C5mU.png"),
    "HAW" : ("Hawaii", fr"https://hoi4.paradoxwikis.com/images/d/d7/Kingdom_of_Hawai%27i.png"),
    "HRZ" : ("Herzegovina", "https://hoi4.paradoxwikis.com/images/f/f8/Herzegovina.png"),
    "ICE" : ("Iceland", "https://hoi4.paradoxwikis.com/images/c/c1/Iceland.png"),
@@ -199,12 +199,12 @@ countries: dict[str, tuple[str, str]] = {
    "KSH" : ("Kashubia", "https://hoi4.paradoxwikis.com/images/c/ca/Kashubia.png"),
    "KAZ" : ("Kazakhstan", "https://hoi4.paradoxwikis.com/images/0/0e/Kazakhstan.png"),
    "KEN" : ("Kenya", "https://hoi4.paradoxwikis.com/images/b/b9/Kenya.png"),
-   "KHA" : ("Khakassia", "https://hoi4.paradoxwikis.com/images/8/87/Republic_of_Khakassia.png"), # Small img
+   "KHA" : ("Khakassia", "https://i.imgur.com/wnoTtHs.gif"), # Only img I could find of this flag, need to test if Discord API accepts .gif
    "KHI" : ("Khiva", "https://hoi4.paradoxwikis.com/images/a/a0/Khivan_Jadidist_Republic.png"),
    "KOM" : ("Komi", "https://hoi4.paradoxwikis.com/images/7/74/Komi_Republic.png"),
    "KOR" : ("Korea", "https://hoi4.paradoxwikis.com/images/4/45/Korea.png"),
    "KOS" : ("Kosovo", "https://hoi4.paradoxwikis.com/images/a/a9/Kosovo.png"),
-   "KUB" : ("Kuban", "https://hoi4.paradoxwikis.com/images/3/38/Kuban_Host.png"), # Small img
+   "KUB" : ("Kuban", "https://i.imgur.com/GBRFUnx.png"),
    "KUW" : ("Kuwait", "https://hoi4.paradoxwikis.com/images/5/5c/Kuwait.png"),
    "KUR" : ("Kurdistan", "https://hoi4.paradoxwikis.com/images/9/95/Kurdistan.png"),
    "KYR" : ("Kyrgyzstan", "https://hoi4.paradoxwikis.com/images/c/ce/Kyrgyzstan.png"),
@@ -221,7 +221,7 @@ countries: dict[str, tuple[str, str]] = {
    "MEL" : ("Mari El", "https://hoi4.paradoxwikis.com/images/c/cb/Mari_El.png"),
    "GUM" : ("Mariana Federation", "https://hoi4.paradoxwikis.com/images/4/44/Mariana_Federation.png"),
    "MRT" : ("Mauritania", "https://hoi4.paradoxwikis.com/images/f/f2/Mauritania.png"),
-   "MEK" : ("Mecklenburg", "https://hoi4.paradoxwikis.com/images/7/74/Grand_Duchy_of_Mecklenburg.png"), # Small img
+   "MEK" : ("Mecklenburg", "https://i.imgur.com/pkzTyCX.png"),
    "FIJ" : ("Fiji", "https://hoi4.paradoxwikis.com/images/2/2f/Melanesian_Federation.png"),
    "FSM" : ("Micronesia", "https://hoi4.paradoxwikis.com/images/0/03/Federated_States_of_Micronesia.png"),
    "MOL" : ("Moldova", "https://hoi4.paradoxwikis.com/images/3/3b/Moldova.png"),
@@ -247,23 +247,23 @@ countries: dict[str, tuple[str, str]] = {
    "QAT" : ("Qatar", "https://hoi4.paradoxwikis.com/images/0/00/Republic_of_Qatar.png"),
    "QEM" : ("Qemant State", "https://hoi4.paradoxwikis.com/images/0/06/Qemant_State.png"),
    "RIF" : ("Rif", "https://hoi4.paradoxwikis.com/images/6/60/Republic_of_the_Rif.png"),
-   "RWA" : ("Rwanda", "https://hoi4.paradoxwikis.com/images/8/8a/Rwanda.png"), # Small img
+   "RWA" : ("Rwanda", "https://i.imgur.com/PGcoWPx.png"),
    "WES" : ("Western Sahara", "https://hoi4.paradoxwikis.com/images/8/88/Sahrawi_Arab_Democratic_Republic.png"),
    "YAK" : ("Sakha Republic", "https://hoi4.paradoxwikis.com/images/3/39/Sakha_Republic.png"),
    "SAM" : ("Samoa", "https://hoi4.paradoxwikis.com/images/4/45/Independent_State_of_Samoa.png"),
    "SPM" : ("Sardinia-Piedmont", "https://hoi4.paradoxwikis.com/images/2/22/Sardinia-Piedmont.png"),
    "SAX" : ("Saxony", "https://hoi4.paradoxwikis.com/images/0/0a/Kingdom_of_Saxony.png"),
-   "SHL" : ("Schleswig-Holstein", "https://hoi4.paradoxwikis.com/images/6/61/Duchy_of_Schleswig-Holstein.png"), # Small img
+   "SHL" : ("Schleswig-Holstein", "https://i.imgur.com/uJ4Rz2R.png"),
    "SCO" : ("Scotland", "https://hoi4.paradoxwikis.com/images/2/27/Scotland.png"),
    "SEN" : ("Senegal", "https://hoi4.paradoxwikis.com/images/2/22/Senegal.png"),
    "SER" : ("Serbia", "https://hoi4.paradoxwikis.com/images/7/76/Serbia.png"),
-   "SID" : ("Sidamo", "https://hoi4.paradoxwikis.com/images/8/87/Kingdom_of_Sidamo.png"), # Small img
+   "SID" : ("Sidamo", "https://i.imgur.com/OEfH3Rc.png"),
    "SIE" : ("Sierra Leone", "https://hoi4.paradoxwikis.com/images/b/bc/Kingdom_of_Sierra_Leone.png"),
    "SIL" : ("Silesia", "https://hoi4.paradoxwikis.com/images/f/f7/Silesia.png"),
    "SLO" : ("Slovakia", "https://hoi4.paradoxwikis.com/images/8/89/Slovakia.png"),
    "SLV" : ("Slovenia", "https://hoi4.paradoxwikis.com/images/3/32/Slovenia.png"),
    "SOL" : ("Solomon Islands", "https://hoi4.paradoxwikis.com/images/1/19/Solomon_Islands.png"),
-   "SOM" : ("Somalia", "https://i.imgur.com/HY1DG2G.png"), # Small img
+   "SOM" : ("Somalia", "https://i.imgur.com/Y8Drza3.png"),
    "SRL" : ("Sri Lanka", "https://hoi4.paradoxwikis.com/images/6/64/Democratic_Socialist_Republic_of_Sri_Lanka.png"),
    "SUD" : ("Sudan", "https://hoi4.paradoxwikis.com/images/3/38/Sudan.png"),
    "SUR" : ("Suriname", "https://hoi4.paradoxwikis.com/images/c/c9/Republic_of_Suriname.png"),
@@ -279,12 +279,12 @@ countries: dict[str, tuple[str, str]] = {
    "TRI" : ("Trinidad and Tobago", "https://hoi4.paradoxwikis.com/images/d/d7/Republic_of_Trinidad_and_Tobago.png"),
    "TUN" : ("Tunisia", "https://hoi4.paradoxwikis.com/images/0/08/Tunisia.png"),
    "TMS" : ("Turkmenistan", "https://hoi4.paradoxwikis.com/images/b/b6/Republic_of_Turkmenistan.png"),
-   "TOS" : ("Tuscany", "https://hoi4.paradoxwikis.com/images/c/c2/Grand_Duchy_of_Tuscany.png"), # Small img
+   "TOS" : ("Tuscany", "https://i.imgur.com/TdK1iAY.jpg"),
    "TTS" : ("Two Sicilies", "https://i.imgur.com/9bm3H1Z.png"),
    "UDM" : ("Udmurtia", "https://hoi4.paradoxwikis.com/images/5/53/Udmurtia.png"),
    "UGA" : ("Uganda", "https://hoi4.paradoxwikis.com/images/4/4c/Uganda.png"),
    "UKR" : ("Ukraine", "https://hoi4.paradoxwikis.com/images/1/1a/Ukraine.png"),
-   "USB" : ("Unaligned States of America", ""), # Missing
+   "USB" : ("Unaligned States of America", "https://hoi4.paradoxwikis.com/images/3/32/United_States.png"), # Using US Flag
    "UAE" : ("United Arab Emirates", "https://hoi4.paradoxwikis.com/images/6/66/United_Arab_Emirates.png"),
    "VOL" : ("Upper Volta", "https://hoi4.paradoxwikis.com/images/b/b8/Upper_Volta.png"),
    "UZB" : ("Uzbekistan", "https://hoi4.paradoxwikis.com/images/2/29/Republic_of_Uzbekistan.png"),
@@ -294,7 +294,7 @@ countries: dict[str, tuple[str, str]] = {
    "WLS" : ("Wales", "https://hoi4.paradoxwikis.com/images/d/d9/Wales.png"),
    "WGR" : ("West Germany", "https://hoi4.paradoxwikis.com/images/c/cc/West_Germany.png"),
    "HAN" : ("Westphalia", "https://i.imgur.com/lBbQxjP.png"),
-   "WUR" : ("Wurtemberg", "https://hoi4.paradoxwikis.com/images/0/0d/Kingdom_of_Wurtemberg.png"), # Small img
+   "WUR" : ("Wurtemberg", "https://i.imgur.com/5G1N75q.png"),
    "YAM" : ("Yamalia", "https://hoi4.paradoxwikis.com/images/6/64/Yamalian_Republic.png"),
    "COG" : ("Zaire", "https://hoi4.paradoxwikis.com/images/5/55/Zaire.png"),
    "ZAM" : ("Zambia", "https://hoi4.paradoxwikis.com/images/a/ad/Zambia.png"),
