@@ -3,6 +3,7 @@ src/discordRPC/dist/
 src/discordRPC/build/
 src/dist/
 src/build/
-*.spec
 *.exe
 __pycache__/
+/dist/
+/build/
