@@ -2,7 +2,7 @@ class Country:
    def __init__(self, name: str, flag: str):
       self.name = name
       self.flag = flag
-   
+
    def __str__(self) -> str:
       return f"{self.name}, {self.flag}"
 
@@ -180,7 +180,7 @@ countries: dict[str, tuple[str, str]] = {
    "GNB" : ("Guinea-Bissau", "https://hoi4.paradoxwikis.com/images/6/67/Guinea-Bissau.png"),
    "GYA" : ("Guyana", "https://i.imgur.com/oH9tyzR.png"),
    "HAR" : ("Harar", "https://i.imgur.com/v08C5mU.png"),
-   "HAW" : ("Hawaii", fr"https://hoi4.paradoxwikis.com/images/d/d7/Kingdom_of_Hawai%27i.png"),
+   "HAW" : ("Hawaii", r"https://hoi4.paradoxwikis.com/images/d/d7/Kingdom_of_Hawai%27i.png"),
    "HRZ" : ("Herzegovina", "https://hoi4.paradoxwikis.com/images/f/f8/Herzegovina.png"),
    "ICE" : ("Iceland", "https://hoi4.paradoxwikis.com/images/c/c1/Iceland.png"),
    "ISR" : ("Israel", "https://hoi4.paradoxwikis.com/images/9/94/Israel.png"),
