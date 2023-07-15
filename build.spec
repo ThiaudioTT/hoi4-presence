@@ -133,3 +133,59 @@ setup_exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
+
+# script to bundle
+
+print("Starting to bundle...")
+import shutil
+
+# copy files 
+print("Copying runRPC.bat...")
+shutil.copy("src/runRPC.bat", "dist/runRPC.bat")
+
+print("Copying version.json...")
+shutil.copy("./version.json", "dist/version.json")
+
+# todo: add readme.txt with instruction of the installation
+
+
+# Moving files
+# Note: probably we dont need it since we can zip the files directly from the dist folder, but is good for testing and development
+import os
+if not os.path.exists("dist/discordRPC"): os.mkdir("dist/discordRPC")
+
+print("Moving hoi4Presence.exe...")
+shutil.move("dist/hoi4Presence.exe", "dist/discordRPC/hoi4Presence.exe")
+
+print("Moving checkupdate.exe...")
+shutil.move("dist/checkupdate.exe", "dist/discordRPC/checkupdate.exe")
+
+print("Moving runRPC.bat...")
+shutil.move("dist/runRPC.bat", "dist/discordRPC/runRPC.bat")
+
+print("Moving version.json...")
+shutil.move("dist/version.json", "dist/discordRPC/version.json")
+
+# zipping files:
+print("Preparing to zip files...")
+import json
+import zipfile
+
+# reading version.json to get the version
+print("Getting version...")
+with open("./version.json", "r") as f: version = json.load(f)["version"]
+
+print("Version: " + version)
+
+print("Zipping files...")
+
+# example of zip name: hoi4-presence-vVERSION.zip
+with zipfile.ZipFile("hoi4-presence-v" + version + ".zip", "w") as zip:
+    zip.write("dist/discordRPC/hoi4Presence.exe", "./discordRPC/hoi4Presence.exe")
+    zip.write("dist/discordRPC/checkupdate.exe", "./discordRPC/checkupdate.exe")
+    zip.write("dist/discordRPC/runRPC.bat", "./discordRPC/runRPC.bat")
+    zip.write("dist/discordRPC/version.json", "./discordRPC/version.json")
+    # zip.write("README.txt", "./README.txt")
+    zip.write("dist/setup.exe", "./setup.exe")
+
+print("Done!")
