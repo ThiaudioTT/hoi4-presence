@@ -31,12 +31,6 @@ def getCountry(country: str) -> Country:
 HOI_ICON = "https://hoi4.paradoxwikis.com/images/8/8a/HoI4_icon.png"
 
 # List of countries, add more if you want
-#
-# Small img comments: img dimensions are very small, and should be replaced with higher resolutions
-# Keep in mind the small img comments may or may not be small anymore since the wiki has had updates to their flag
-# resolutions before
-#
-# Missing comments: Could not find flag images on either the wiki or imgur
 countries: dict[str, tuple[str, str]] = {
 
    # Countries in this block of code have more than one tag or have a special case
