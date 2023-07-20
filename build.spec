@@ -165,10 +165,10 @@ print("Zipping files...")
 
 # example of zip name: hoi4-presence-vVERSION.zip
 with zipfile.ZipFile("hoi4-presence-v" + version + ".zip", "w") as zip:
-    zip.write("dist/discordRPC/hoi4Presence.exe", "./discordRPC/hoi4Presence.exe")
-    zip.write("dist/discordRPC/checkupdate.exe", "./discordRPC/checkupdate.exe")
-    zip.write("dist/discordRPC/runRPC.bat", "./discordRPC/runRPC.bat")
-    zip.write("dist/discordRPC/version.json", "./discordRPC/version.json")
+    zip.write("dist/discordRPC/hoi4Presence.exe", "./discordRPC/dist/hoi4Presence.exe")
+    zip.write("dist/discordRPC/checkupdate.exe", "./discordRPC/dist/checkupdate.exe")
+    zip.write("dist/discordRPC/runRPC.bat", "./discordRPC/dist/runRPC.bat")
+    zip.write("dist/discordRPC/version.json", "./discordRPC/dist/version.json")
     # zip.write("README.txt", "./README.txt")
     zip.write("dist/setup.exe", "./setup.exe")
 
