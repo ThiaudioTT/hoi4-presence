@@ -7,3 +7,5 @@ src/build/
 __pycache__/
 /dist/
 /build/
+hoi4-presence*/
+*.zip
