@@ -77,4 +77,5 @@ except Exception as e:
     sys.exit()
 
 print("Uninstalled!\nPress 'Enter' or close this window.")
+time.sleep(4)
 input()
