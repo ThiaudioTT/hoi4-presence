@@ -68,7 +68,7 @@ except Exception as e:
 # Delete hoi4Presence and runRPC.bat
 try:
     print("Deleting rich presence")
-    shutil.rmtree(os.path.join(gameFolder, "hoi4Presence"))
+    shutil.rmtree(os.path.join(documents, "hoi4Presence"))
     os.remove(os.path.join(gameFolder, "runRPC.bat"))
 except Exception as e:
     print(str(e))
