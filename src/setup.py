@@ -81,9 +81,9 @@ while True:
 
 # updates the bat file:
 print("Updating the runRPC.bat...\n")
+batchPath = os.path.join(source, "runRPC.bat")
 if documents != os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV":
     try:
-        batchPath = os.path.join(source, "runRPC.bat")
         with open(batchPath, 'r') as file:
             lines = file.readlines()
 
