@@ -4,8 +4,19 @@ import time
 import sys
 import json
 
+IS_AUTO = '-auto' in sys.argv
+
+def customInput() -> str | None:
+    """
+    Checks first if this has been started by the auto updater
+    so the auto installation doesn't freeze from `input()`
+    """
+
+    if not IS_AUTO:
+        return input()
+
 print("This script will install the hoi4-presence in your game/save path\nPress enter to continue...")
-input()
+customInput()
 
 # 1 - Move hoi4Presence to documents/paradox/hearts of iron/ WITH CURRENTLY version.json and uninstaller.py
     # 1.1 - If can't move, exit. 
@@ -29,7 +40,7 @@ try:
     source = os.path.join(os.path.abspath(os.curdir), "discordRPC\\dist")
 
     # If any files are needed within the /dist/ folder, add them here
-    requiredFiles = ("checkupdate.exe", "hoi4Presence.exe", "version.json", "runRPC.bat")
+    requiredFiles = ("hoi4Presence.exe", "version.json", "runRPC.bat")
     filesNotFound = []
 
     # Checking if the required files are in /dist/
@@ -175,6 +186,9 @@ except Exception as e:
 print("\n\nSuccess! The hoi4Presence is installed in your game folder.\n\n")
 print("Execute the game via launcher to auto activate the presence.\n\nYou can delete this folder now.\n\n")
 print("See https://github.com/ThiaudioTT/hoi4-presence for updates and more information.\n\n")
-input()
+
+customInput()
+
 time.sleep(5)
+
 sys.exit()
