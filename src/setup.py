@@ -4,7 +4,7 @@ import time
 import sys
 import json
 
-IS_AUTO = '-auto' in sys.argv
+IS_UPDATE = '-update' in sys.argv
 
 def customInput() -> str | None:
     """
@@ -12,7 +12,7 @@ def customInput() -> str | None:
     so the auto installation doesn't freeze from `input()`
     """
 
-    if not IS_AUTO:
+    if not IS_UPDATE:
         return input()
 
 print("This script will install the hoi4-presence in your game/save path\nPress enter to continue...")
@@ -40,7 +40,7 @@ try:
     source = os.path.join(os.path.abspath(os.curdir), "discordRPC\\dist")
 
     # If any files are needed within the /dist/ folder, add them here
-    requiredFiles = ("hoi4Presence.exe", "version.json", "runRPC.bat")
+    requiredFiles = ("checkupdate.exe", "hoi4Presence.exe", "version.json", "runRPC.bat")
     filesNotFound = []
 
     # Checking if the required files are in /dist/
@@ -190,5 +190,8 @@ print("See https://github.com/ThiaudioTT/hoi4-presence for updates and more info
 customInput()
 
 time.sleep(5)
+
+if IS_UPDATE:
+    os.startfile(os.path.join(gameFolder, "runRPC.bat"))
 
 sys.exit()

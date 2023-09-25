@@ -1,5 +1,4 @@
 # COMPILE THIS USING --onefile
-import subprocess
 import semantic_version
 import time
 import urllib.request
@@ -43,7 +42,9 @@ def checkUpdate():
 
             installerPath = os.path.join(downloadPath, "setup.exe")
 
-            # Using `subproccess.call()` so the script can end when `setup.exe` ends, which will continue `runRPC.bat`
-            subprocess.call([installerPath, "-auto"])
+            # Starting setup.exe in -update mode so it will automatically install and start up the mod
+            os.startfile(installerPath, "-update")
+
+            sys.exit()
 
 checkUpdate()
