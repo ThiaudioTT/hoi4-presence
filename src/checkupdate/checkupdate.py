@@ -1,4 +1,5 @@
 # COMPILE THIS USING --onefile
+import subprocess
 import semantic_version
 import time
 import urllib.request
@@ -7,10 +8,13 @@ import json
 import sys
 import os
 
-from checkupdate.downloadupdate import downloadUpdate
+from downloadupdate import downloadUpdate
 
 def checkUpdate():
     try:
+
+        print("Checking for updates in hoi4 presence...")
+
         # picking the current dir
         version_path = ""
         if getattr(sys, 'frozen', False):
@@ -32,9 +36,9 @@ def checkUpdate():
     URL = urllib.request.urlopen("https://raw.githubusercontent.com/ThiaudioTT/hoi4-presence/main/version.json")
     cloudVersion = json.loads(URL.read())
 
-    print("Checking for updates in hoi4 presence...")
-
     if semantic_version.Version(localVersion["version"]) < semantic_version.Version(cloudVersion["version"]):
+
+        print("Update found!")
 
         downloadPath = downloadUpdate()
 
@@ -42,9 +46,16 @@ def checkUpdate():
 
             installerPath = os.path.join(downloadPath, "setup.exe")
 
-            # Starting setup.exe in -update mode so it will automatically install and start up the mod
-            os.startfile(installerPath, "-update")
+            print('Updating...\n\n')
 
-            sys.exit()
+            gameFolder = os.path.dirname(os.getcwd())
+
+            print(gameFolder)
+
+            # Starting setup.exe in -update mode so it will automatically install and start up the mod
+            subprocess.Popen([installerPath, "-update", gameFolder], start_new_session=True)
+
+            # Close checkUpdate.exe (setup.exe will still run and in the new window)
+            sys.exit(0)
 
 checkUpdate()

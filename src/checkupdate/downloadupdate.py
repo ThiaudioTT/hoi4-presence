@@ -41,21 +41,25 @@ def downloadUpdate() -> str | None:
 
         if downloadLink:
 
-            # Instance a session
-            session = requests.Session()
-
             downloadTemp = os.path.join(os.environ["TEMP"], fileName)
 
             # Creating a new file in "write in binary" mode
             with open(downloadTemp, "wb") as f:
 
                 # Get data for download
-                request = session.get(downloadLink, allow_redirects=True, stream=True)
+                request = requests.get(downloadLink, allow_redirects=True, stream=True)
 
+                chunksDownloaded = 0
+                totalChunks = len(request.content)
+
+                print("Starting Download")
                 # Write it to fileName in chunks
                 for chunk in request.iter_content(1024**2):
+                    print(f"{chunksDownloaded / totalChunks * 100:.0f}%")
                     f.write(chunk)
+                    chunksDownloaded += len(chunk)
 
+            print("100%")
             print("Download successful!")
 
         extractedTemp = os.path.join(os.environ["TEMP"], f"hoi4-presence-{latestReleaseData['tag_name']}")

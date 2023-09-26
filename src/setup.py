@@ -4,7 +4,21 @@ import time
 import sys
 import json
 
-IS_UPDATE = '-update' in sys.argv
+# Parsing arguments
+IS_UPDATE = False
+
+GAMEFOLDER: str | None = None
+
+num_of_args = len(sys.argv)
+
+if num_of_args >= 2:
+    IS_UPDATE = sys.argv[1] == "-update"
+
+if num_of_args >= 3:
+    DOCUMENTS = sys.argv[2]
+
+if num_of_args >= 4:
+    GAMEFOLDER = sys.argv[3]
 
 def customInput() -> str | None:
     """
@@ -76,7 +90,11 @@ except Exception as e:
     sys.exit()
 
 # 1 
-documents = os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV"
+if DOCUMENTS:
+    documents = DOCUMENTS
+else:
+    documents = os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV"
+
 while True:
     try:
         if 'settings.txt' not in os.listdir(documents):
@@ -141,7 +159,11 @@ except Exception as e:
     sys.exit()
 
 # 3
-gameFolder = os.environ['PROGRAMFILES(X86)'] + "\\Steam\\steamapps\\common\\Hearts of Iron IV"
+if GAMEFOLDER:
+    gameFolder = GAMEFOLDER
+else:
+    gameFolder = os.environ['PROGRAMFILES(X86)'] + "\\Steam\\steamapps\\common\\Hearts of Iron IV"
+
 while True:
     try:
         if "hoi4.exe" not in os.listdir(gameFolder):
