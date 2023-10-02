@@ -1,6 +1,6 @@
 # COMPILE THIS USING --onefile
 import subprocess
-import semantic_version
+from semantic_version import Version
 import time
 import urllib.request
 import time
@@ -36,7 +36,7 @@ def checkUpdate():
     URL = urllib.request.urlopen("https://raw.githubusercontent.com/ThiaudioTT/hoi4-presence/main/version.json")
     cloudVersion = json.loads(URL.read())
 
-    if semantic_version.Version(localVersion["version"]) < semantic_version.Version(cloudVersion["version"]):
+    if Version(localVersion["version"]) < Version(cloudVersion["version"]):
 
         print("Update found!")
 
@@ -48,12 +48,8 @@ def checkUpdate():
 
             print('Updating...\n\n')
 
-            gameFolder = os.path.dirname(os.getcwd())
-
-            print(gameFolder)
-
             # Starting setup.exe in -update mode so it will automatically install and start up the mod
-            subprocess.Popen([installerPath, "-update", gameFolder], start_new_session=True)
+            subprocess.Popen([installerPath, "-update"], start_new_session=True)
 
             # Close checkUpdate.exe (setup.exe will still run and in the new window)
             sys.exit(0)

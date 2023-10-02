@@ -39,7 +39,7 @@ def downloadUpdate() -> str | None:
 
                 break
 
-        if downloadLink:
+        if downloadLink is not None:
 
             downloadTemp = os.path.join(os.environ["TEMP"], fileName)
 
