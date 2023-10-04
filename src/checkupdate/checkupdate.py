@@ -36,7 +36,9 @@ def checkUpdate():
     URL = urllib.request.urlopen("https://raw.githubusercontent.com/ThiaudioTT/hoi4-presence/main/version.json")
     cloudVersion = json.loads(URL.read())
 
-    if Version(localVersion["version"]) < Version(cloudVersion["version"]):
+    isClientOutdated = Version(localVersion["version"]) < Version(cloudVersion["version"])
+
+    if localVersion['auto-update'] and isClientOutdated:
 
         print("Update found!")
 
