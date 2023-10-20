@@ -51,7 +51,9 @@ def checkUpdate():
             print('Updating...\n\n')
 
             # Starting setup.exe in -update mode so it will automatically install and start up the mod
-            subprocess.Popen([installerPath, "-update"], start_new_session=True)
+            subprocess.Popen([installerPath, "-update"], start_new_session=True, cwd=downloadPath) # passing cwd to the script knows where he is
+
+            print('Closing checkUpdate.exe...')
 
             # Close checkUpdate.exe (setup.exe will still run and in the new window)
             sys.exit(0)
