@@ -1,6 +1,6 @@
 {
     "OBS:": "THIS IS A TEST VERSION ONLY FOR DELEVOPING PURPOSES",
     "version": "0.1.0",
-    "auto-update": false,
+    "auto-update": true,
     "date": "23-sep-2022"
 }

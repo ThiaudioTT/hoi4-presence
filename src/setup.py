@@ -4,9 +4,27 @@ import time
 import sys
 import json
 
-print("This script will install the hoi4-presence in your game/save path\nPress enter to continue...")
-input()
+# Parsing arguments
+IS_UPDATE = False
 
+num_of_args = len(sys.argv)
+
+if num_of_args >= 2:
+    IS_UPDATE = sys.argv[1] == "-update"
+
+def customInput() -> str | None:
+    """
+    Checks first if this has been started by the auto updater
+    so the auto installation doesn't freeze from `input()`
+    """
+
+    if not IS_UPDATE:
+        return input()
+
+print("This script will install the hoi4-presence in your game/save path\nPress enter to continue...")
+customInput()
+
+# 0 - Stop any running instances of hoi4Presence.exe
 # 1 - Move hoi4Presence to documents/paradox/hearts of iron/ WITH CURRENTLY version.json and uninstaller.py
     # 1.1 - If can't move, exit. 
     # 1.2 - If can't search, ask the user where is the path
@@ -63,6 +81,18 @@ except Exception as e:
 
     time.sleep(10)
     sys.exit()
+
+# 0 - Stop any running instances of hoi4Presence.exe
+# TODO: probably theres a better way to do this and this should be executed always
+if IS_UPDATE:
+    print("Stopping any running instances of hoi4Presence.exe...")
+    result = os.system("taskkill /f /im hoi4Presence.exe")
+
+    if result == 0:
+        print("Process terminated successfully.")
+    else:
+        print("Error occurred while terminating the process.")
+        sys.exit(1)
 
 # 1 
 documents = os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV"
@@ -131,6 +161,7 @@ except Exception as e:
 
 # 3
 gameFolder = os.environ['PROGRAMFILES(X86)'] + "\\Steam\\steamapps\\common\\Hearts of Iron IV"
+
 while True:
     try:
         if "hoi4.exe" not in os.listdir(gameFolder):
@@ -175,6 +206,12 @@ except Exception as e:
 print("\n\nSuccess! The hoi4Presence is installed in your game folder.\n\n")
 print("Execute the game via launcher to auto activate the presence.\n\nYou can delete this folder now.\n\n")
 print("See https://github.com/ThiaudioTT/hoi4-presence for updates and more information.\n\n")
-input()
+
+customInput()
+
 time.sleep(5)
+
+if IS_UPDATE:
+    os.startfile(os.path.join(gameFolder, "runRPC.bat"))
+
 sys.exit()

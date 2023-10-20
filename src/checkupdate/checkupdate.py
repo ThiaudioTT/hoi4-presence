@@ -1,5 +1,6 @@
 # COMPILE THIS USING --onefile
-import semantic_version
+import subprocess
+from semantic_version import Version
 import time
 import urllib.request
 import time
@@ -7,8 +8,13 @@ import json
 import sys
 import os
 
+from downloadupdate import downloadUpdate
+
 def checkUpdate():
     try:
+
+        print("Checking for updates in hoi4 presence...")
+
         # picking the current dir
         version_path = ""
         if getattr(sys, 'frozen', False):
@@ -16,8 +22,8 @@ def checkUpdate():
         else:
             version_path = os.path.dirname(os.path.abspath(__file__))
 
-        localVersion = open(version_path + "/version.json", "r") # use something like .resolve() or clean code
-        localVersion = json.load(localVersion)
+        with open(version_path + "/version.json", "r") as f:
+            localVersion = json.load(f)
 
         print("\nLocal version: ")
         print(localVersion)
@@ -30,13 +36,26 @@ def checkUpdate():
     URL = urllib.request.urlopen("https://raw.githubusercontent.com/ThiaudioTT/hoi4-presence/main/version.json")
     cloudVersion = json.loads(URL.read())
 
-    print("Checking for updates in hoi4 presence...")
-    if semantic_version.Version(localVersion["version"]) < semantic_version.Version(cloudVersion["version"]):
-        print("\n\n\nUpdate available!")
-        print("Please, download the latest version from:\nhttps://github.com/ThiaudioTT/hoi4-presence/releases")
-        time.sleep(120)
-    else:
-        print("Update not found.")
-        time.sleep(5)
+    isClientOutdated = Version(localVersion["version"]) < Version(cloudVersion["version"])
+
+    if localVersion['auto-update'] and isClientOutdated:
+
+        print("Update found!")
+
+        downloadPath = downloadUpdate()
+
+        if downloadPath is not None:
+
+            installerPath = os.path.join(downloadPath, "setup.exe")
+
+            print('Updating...\n\n')
+
+            # Starting setup.exe in -update mode so it will automatically install and start up the mod
+            subprocess.Popen([installerPath, "-update"], start_new_session=True, cwd=downloadPath) # passing cwd to the script knows where he is
+
+            print('Closing checkUpdate.exe...')
+
+            # Close checkUpdate.exe (setup.exe will still run and in the new window)
+            sys.exit(0)
 
 checkUpdate()

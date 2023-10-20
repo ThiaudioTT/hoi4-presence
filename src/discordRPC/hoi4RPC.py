@@ -37,7 +37,7 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
          path = os.path.dirname(sys.executable)
       else:
          path = os.path.dirname(os.path.abspath(__file__))
-      
+
       path = os.path.abspath(path + "/../" + "/save games/*.hoi4")
 
       # getting the last modified save file
@@ -48,7 +48,7 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
       now = int(time.time())
       saveNew = (now - dateFile) <= 120 # calc to see if save is recently (2 min recently)
       # saveNew = True # for testing
-      
+
       if(saveNew): 
          print("New save found!")
          # putting this in a function might be good.
@@ -69,7 +69,7 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
          year = data[2][:4]
          mode = data[3]
 
-         
+
          # hint: use discord developer portal
          RPC.update(
             state="Year: " + year,
@@ -80,13 +80,13 @@ while gameRunning:  # The presence will stay on as long as the program is runnin
             small_text="In " + mode + " mode",
             start=playTime
          )
-         
+
          print(data) # debug
    except Exception as e:
       print(e)
       time.sleep(5)
-   
-   time.sleep(30) #Wait a wee bit
+
+   time.sleep(30) # Wait a wee bit
    gameRunning = False
    for proc in psutil.process_iter():
       if proc.name() == "hoi4.exe":
