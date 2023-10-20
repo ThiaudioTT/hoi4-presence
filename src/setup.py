@@ -24,6 +24,7 @@ def customInput() -> str | None:
 print("This script will install the hoi4-presence in your game/save path\nPress enter to continue...")
 customInput()
 
+# 0 - Stop any running instances of hoi4Presence.exe
 # 1 - Move hoi4Presence to documents/paradox/hearts of iron/ WITH CURRENTLY version.json and uninstaller.py
     # 1.1 - If can't move, exit. 
     # 1.2 - If can't search, ask the user where is the path
@@ -80,6 +81,18 @@ except Exception as e:
 
     time.sleep(10)
     sys.exit()
+
+# 0 - Stop any running instances of hoi4Presence.exe
+# TODO: probably theres a better way to do this and this should be executed always
+if IS_UPDATE:
+    print("Stopping any running instances of hoi4Presence.exe...")
+    result = os.system("taskkill /f /im hoi4Presence.exe")
+
+    if result == 0:
+        print("Process terminated successfully.")
+    else:
+        print("Error occurred while terminating the process.")
+        sys.exit(1)
 
 # 1 
 documents = os.environ['USERPROFILE'] + "\\Documents\\Paradox Interactive\\Hearts of Iron IV"
