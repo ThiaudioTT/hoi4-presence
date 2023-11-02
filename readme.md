@@ -23,7 +23,11 @@ Hoi4 Rich Presence
 
 </div>
 
-## Download and install
+## About
+
+This is a presence for discord that shows what you are doing in Hearts of Iron 4.
+
+## How to Download and install
 
 Download the lastest presence from:
 
