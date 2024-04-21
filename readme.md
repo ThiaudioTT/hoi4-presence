@@ -31,9 +31,13 @@ This is a presence for discord that shows what you are doing in Hearts of Iron 4
 
 Struggling in installing? See the [Wiki](https://github.com/ThiaudioTT/hoi4-presence/wiki/Downloading,-Installing-and-Uninstalling).
 
+## Known issues
+
+HOI4 is frequently updating, see known issues in [Issues](https://github.com/ThiaudioTT/hoi4-presence/labels/bug).
+
 ## Submiting an issue
 
-Found a bug? Submit it in [Issues](https://github.com/ThiaudioTT/hoi4-presence/issues).
+Found a bug? [Submit it](https://github.com/ThiaudioTT/hoi4-presence/issues/new/choose).
 
 ## Contributing
 
