@@ -18,7 +18,7 @@ try:
 
    # default values
    RPC.update(
-      details="In menus...",
+      details="Preparing for war...",
       large_image="hoi4-logo", # put this in a var?
       large_text="thiaudiott/hoi4-presence on Github!",
       start=playTime
