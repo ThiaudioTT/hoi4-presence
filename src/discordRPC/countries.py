@@ -17,18 +17,18 @@ def getCountry(country: str) -> Country:
 
    # This is raised when there is a country that isn't in the countries dictionary
    if countryTuple is None:
-      countries[country] = (country, HOI_ICON)
+      countries[country] = (country, DEFAULT_LARGE_IMAGE)
 
    # Raised if there isn't an image link
    elif countryTuple[1] == "":
-      countries[country] = (countryTuple[0], HOI_ICON)
+      countries[country] = (countryTuple[0], DEFAULT_LARGE_IMAGE)
 
    countryName = countries[country][0]
    flag = countries[country][1]
 
    return Country(countryName, flag)
 
-HOI_ICON = "https://hoi4.paradoxwikis.com/images/8/8a/HoI4_icon.png"
+DEFAULT_LARGE_IMAGE = "hoi4-logo2"
 
 # List of countries, add more if you want
 countries: dict[str, tuple[str, str]] = {
@@ -39,7 +39,7 @@ countries: dict[str, tuple[str, str]] = {
    "FRA" : ("France", "https://hoi4.paradoxwikis.com/images/d/de/France.png"),
    "SPR" : ("Spain", "https://hoi4.paradoxwikis.com/images/2/2c/Nationalist_Spain.png"),
    "BUL" : ("Bulgaria", "https://hoi4.paradoxwikis.com/images/f/f4/Bulgaria.png"),
-   "D##" : ("Civil War Country", HOI_ICON),
+   "D##" : ("Civil War Country", DEFAULT_LARGE_IMAGE),
 
    "AFG" : ("Afghanistan", "https://hoi4.paradoxwikis.com/images/7/7d/Afghanistan.png"),
    "ALB" : ("Albania", "https://hoi4.paradoxwikis.com/images/0/07/Albania.png"),
