@@ -10,3 +10,9 @@ __pycache__/
 hoi4-presence*/
 *.zip
 .venv/
+flags/
+releasedCountries.py
+initialCountries.py
+tools/flags/
+tools/releasedCountries.py
+tools/initialCountries.py
