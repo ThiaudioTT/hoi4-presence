@@ -43,8 +43,9 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "latest"
-          prerelease: false
-          draft: true
+          # prerelease: false
+          prerelease: true
+          # draft: true
           title: "Development Build"
           files: |
             LICENSE.txt
