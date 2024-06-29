@@ -9,6 +9,18 @@ import countries
 
 # FLAGS FOR THE COMPILER: --name hoi4Presence --noconsole --onefile
 
+def getSavePath() -> str:
+   "Gets the save path for the save files"
+   save_path = ""
+   # Check if the script is compiled or not
+   if getattr(sys, 'frozen', False): save_path = os.path.dirname(sys.executable)
+   else: save_path = os.path.dirname(os.path.abspath(__file__)) # case is not compiled
+
+   # getting the save files path
+   save_path = os.path.abspath(save_path + "/../" + "/save games/*.hoi4")
+
+   return save_path
+
 try:
    client_id = '1021549599732809820'
    RPC = Presence(client_id)  # Initialize the Presence class
@@ -31,17 +43,12 @@ except Exception as e:
 gameRunning = True
 while gameRunning:  # The presence will stay on as long as the program is running, so use some lib
    try:
+      SAVE_PATH = getSavePath()
 
-      path = "" # path to the saves
-      if getattr(sys, 'frozen', False):
-         path = os.path.dirname(sys.executable)
-      else:
-         path = os.path.dirname(os.path.abspath(__file__))
-
-      path = os.path.abspath(path + "/../" + "/save games/*.hoi4")
+      #TODO: refactor this code.
 
       # getting the last modified save file
-      listSaves = glob.glob(path)
+      listSaves = glob.glob(SAVE_PATH)
       lastSavePath = max(listSaves, key=os.path.getmtime)
 
       dateFile = int(os.path.getmtime(lastSavePath))
