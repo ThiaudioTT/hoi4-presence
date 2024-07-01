@@ -40,10 +40,12 @@ countries: dict[str, tuple[str, str]] = {
    "D##" : ("Civil War Country", DEFAULT_LARGE_IMAGE),
 
    # handling the special cases
+   # Idk why they have more tags, since the game only uses the first one. But I'll add them anyway.
    "SOV" : ("Soviet Union", "sov"),
    "ITA" : ("Italy", "ita"),
-   "SPA" : ("Spain", "spa"),
-   "SPD" : ("Spain", "spd"),
+   "SPR" : ("Spain", "spr"), 
+   "SPA" : ("Nationalist Spain", "spa"),
+   "SPD" : ("Republican Spain", "spd"),
    "BUL" : ("Bulgaria", "bul"),
    "FRA" : ("France", "fra"),
    "VIC" : ("France", "vic"), # wheres free france?
