@@ -5,6 +5,7 @@ import os
 # this script is used to get the vanilla countries from the wiki
 # It creates a file with the countries and their codes in a python dictionary format
 # it also downloads the flags of the countries
+# execut to see the failed: python your_script.py > output.log
 
 # Todo: this was made in a hurry, LMAO. Refactor it!
 # Hint: use threads to be faster
@@ -80,12 +81,11 @@ def main():
     # Download the images and create the dictionary with the countries
     getCountries(initialCountriesTable, "initialCountries")
 
-    # todo: do this part
-    # # pick the table with the released countries
-    # releasedCountriesTable = soup.select_one("table.wikitable:nth-child(26) > tbody")
+    # pick the table with the released countries
+    releasedCountriesTable = soup.select_one("table.wikitable:nth-child(26) > tbody")
 
-    # # Download the images and create the dictionary with the countries
-    # getCountries(releasedCountriesTable, "releasedCountries")
+    # Download the images and create the dictionary with the countries
+    getCountries(releasedCountriesTable, "releasedCountries")
 
     print("Done.")
 
