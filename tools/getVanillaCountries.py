@@ -84,11 +84,12 @@ def main():
     # Download the images and create the dictionary with the countries
     getCountries(initialCountriesTable, "initialCountries")
 
-    # pick the table with the released countries
-    releasedCountriesTable = soup.select_one("table.wikitable:nth-child(26) > tbody")
+    # todo: do the same for released countries (this is a bit more complicated becasuse the wiki doenst have it)
+    # # pick the table with the released countries
+    # releasedCountriesTable = soup.select_one("table.wikitable:nth-child(26) > tbody")
 
-    # Download the images and create the dictionary with the countries
-    getCountries(releasedCountriesTable, "releasedCountries")
+    # # Download the images and create the dictionary with the countries
+    # getCountries(releasedCountriesTable, "releasedCountries")
 
     print("Done.")
 
