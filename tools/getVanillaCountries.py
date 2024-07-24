@@ -12,8 +12,7 @@ import os
 
 HOI_SOURCE = "https://hoi4.paradoxwikis.com/"
 
-# Helper functions
-
+# Helper functions:
 def getCountryDetails(row) -> tuple[str, str]:
     country_name = row.find_all("td")[0].text.strip()
     country_code = row.find_all("td")[1].text.strip()
@@ -34,8 +33,27 @@ def getSoup(url: str, error_message: str) -> BeautifulSoup:
     
     return BeautifulSoup(response.text, 'html.parser')
 
+def downloadFlagImage(flagWebpage: BeautifulSoup, country_code: str) -> None:
+    """Downloads the flag image of the country and saves it in the flags folder"""
+    IMAGE = flagWebpage.select_one("#file > a > img") # get the image tag
+    if not IMAGE:
+        print(f"Failed to get flag IMAGE for {country_code}")
+        return
+    
+    flag_url = HOI_SOURCE + IMAGE["src"]
+
+    flag_response = requests.get(flag_url)
+    if flag_response.status_code == 200:
+        with open(f"flags/{country_code}.png", "wb") as flag_file:
+            flag_file.write(flag_response.content)
+        print(f"Flag for {country_code} downloaded.")
+    else:
+        print(f"Failed to download flag for {country_code}")
+    
+
+
 def getCountries(table: list[str], filename: str):
-    """Donwloads the flags of the countries and creates a file with the countries and their codes in a python dictionary format"""
+    """Downloads the flags of the countries and creates a file with the countries and their codes in a python dictionary format"""
     for row in table.find_all("tr"):
         if not row.find_all("td"): continue
 
@@ -48,57 +66,29 @@ def getCountries(table: list[str], filename: str):
 
             # Download the flag of the country
             # the flag is in another webpage
-            image_webpage = HOI_SOURCE + row.find_all("td")[0].find("a")["href"][1:]
+            country_webpage_URL = HOI_SOURCE + row.find_all("td")[0].find("a")["href"][1:]
+            country_webpage = getSoup(country_webpage_URL, f"Failed to get flag WEBPAGE for {cName}")
 
-            image_webpage_response = requests.get(image_webpage)
-            if image_webpage_response.status_code != 200:
-                print(f"Failed to get flag WEBPAGE for {cName}")
-                continue
-                
-            image_webpage_soup = BeautifulSoup(image_webpage_response.text, 'html.parser')
 
-            # image = image_webpage_soup.select_one("div.eu4box:nth-child(2) > a:nth-child(2) > img")
-            image_location = HOI_SOURCE + image_webpage_soup.select_one("div.mw-parser-output:nth-child(4) > div:nth-child(2) > a")["href"][1:]
+            # Enters another webpage to get the flag (the webpage has the flag in a different size)
+            cFlag_webpage = HOI_SOURCE + country_webpage.select_one("div.mw-parser-output:nth-child(4) > div:nth-child(2) > a")["href"][1:]
+            cFlag_webpage = getSoup(cFlag_webpage, f"Failed to get flag WEBPAGE for {cName}")
 
-            image_response = requests.get(image_location)
-            if image_response.status_code != 200:
-                print(f"Failed to get flag IMAGE for {cName}")
-                continue
-
-            image_soup = BeautifulSoup(image_response.text, 'html.parser')
-
-            image = image_soup.select_one("#file > a > img")
-
-            if not image:
-                print(f"Failed to get flag IMAGE for {cName}")
-                continue
-
-            flag_url = HOI_SOURCE + image["src"]
-
-            flag_response = requests.get(flag_url)
-            if flag_response.status_code == 200:
-                with open(f"flags/{cCode}.png", "wb") as flag_file:
-                    flag_file.write(flag_response.content)
-                print(f"Flag for {cName} downloaded.")
-            else:
-                print(f"Failed to download flag for {cName}")
+            downloadFlagImage(cFlag_webpage, cCode)
         except Exception as e:
             print(f"Failed to get flag for {cName} - {e}")
 
 
 def main():
+    print("Getting countries from wiki...")
     countriesWiki = "https://hoi4.paradoxwikis.com/Countries"
-    responseCountriesWiki = requests.get(countriesWiki)
-    if responseCountriesWiki.status_code != 200:
-        print("Failed to get countries from wiki.")
-        return
-    soup = BeautifulSoup(responseCountriesWiki.text, 'html.parser')
+
+    wikiSoup = getSoup(countriesWiki, "Failed to get countries from wiki.")
 
     os.makedirs("flags", exist_ok=True)
 
-
     # pick the table with the initial countries
-    initialCountriesTable = soup.select_one("table.wikitable:nth-child(16) > tbody")
+    initialCountriesTable = wikiSoup.select_one("table.wikitable:nth-child(16) > tbody")
 
     # Download the images and create the dictionary with the countries
     getCountries(initialCountriesTable, "initialCountries")
