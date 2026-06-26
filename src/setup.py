@@ -193,7 +193,8 @@ try:
     print("Changing launcher-settings.json...")
     with open(gameFolder + "\\launcher-settings.json", "r", encoding="utf-8") as f:
         launcher = json.load(f)
-        launcher["exePath"] = "runRPC.bat"
+        launcher["exePath"] = "./runRPC.bat"
+        launcher["exeArgs"] = []  # gdpr-compliant arg now lives in runRPC.bat
     with open(gameFolder + "\\launcher-settings.json", "w", encoding="utf-8") as f:
         json.dump(launcher, f, indent=4)
 except Exception as e:
