@@ -47,7 +47,7 @@ try:
     source = os.path.join(os.path.abspath(os.curdir), "discordRPC\\dist")
 
     # If any files are needed within the /dist/ folder, add them here
-    requiredFiles = ("checkupdate.exe", "hoi4Presence.exe", "version.json", "runRPC.bat")
+    requiredFiles = ("checkupdate.exe", "hoi4Presence.exe", "version.json", "runRPC.bat", "runRPC.exe")
     filesNotFound = []
 
     # Checking if the required files are in /dist/
@@ -178,10 +178,11 @@ while True:
 
 #   moving...
 try:
-    print("Moving runRPC.bat to the game folder...")
+    print("Moving runRPC.bat and runRPC.exe to the game folder...")
     print(gameFolder)
 
     shutil.copyfile(batchPath, gameFolder + "\\runRPC.bat")
+    shutil.copyfile(os.path.join(source, "runRPC.exe"), gameFolder + "\\runRPC.exe")
 except Exception as e:
     print(e)
     print("Can't move the runRPC.bat to the game folder\nExiting...")
@@ -193,8 +194,11 @@ try:
     print("Changing launcher-settings.json...")
     with open(gameFolder + "\\launcher-settings.json", "r", encoding="utf-8") as f:
         launcher = json.load(f)
-        launcher["exePath"] = "./runRPC.bat"
-        launcher["exeArgs"] = []  # gdpr-compliant arg now lives in runRPC.bat
+        # launcher spawns without a shell and prepends its own args -> can't
+        # target a .bat. runRPC.exe is a spawnable shim that runs runRPC.bat,
+        # which launches hoi4.exe -gdpr-compliant plus the presence.
+        launcher["exePath"] = "./runRPC.exe"
+        launcher["exeArgs"] = []
     with open(gameFolder + "\\launcher-settings.json", "w", encoding="utf-8") as f:
         json.dump(launcher, f, indent=4)
 except Exception as e:

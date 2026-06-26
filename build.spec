@@ -80,6 +80,44 @@ checkupdate_exe = EXE(
     entitlements_file=None,
 )
 
+runRPC_a = Analysis(
+    ['src/launcher/launcher.py'],
+    pathex=[],
+    binaries=[],
+    datas=[],
+    hiddenimports=[],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+runRPC_pyz = PYZ(runRPC_a.pure, runRPC_a.zipped_data, cipher=block_cipher)
+runRPC_exe = EXE(
+    runRPC_pyz,
+    runRPC_a.scripts,
+    runRPC_a.binaries,
+    runRPC_a.zipfiles,
+    runRPC_a.datas,
+    [],
+    name='runRPC',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+)
+
 setup_a = Analysis(
     ['src/setup.py'],
     pathex=[],
@@ -182,6 +220,9 @@ shutil.move("dist/hoi4Presence.exe", "dist/discordRPC/hoi4Presence.exe")
 print("Moving checkupdate.exe...")
 shutil.move("dist/checkupdate.exe", "dist/discordRPC/checkupdate.exe")
 
+print("Moving runRPC.exe...")
+shutil.move("dist/runRPC.exe", "dist/discordRPC/runRPC.exe")
+
 print("Moving runRPC.bat...")
 shutil.move("dist/runRPC.bat", "dist/discordRPC/runRPC.bat")
 
@@ -205,6 +246,7 @@ print("Zipping files...")
 with zipfile.ZipFile("hoi4-presence-v" + version + ".zip", "w") as zip:
     zip.write("dist/discordRPC/hoi4Presence.exe", "./discordRPC/dist/hoi4Presence.exe")
     zip.write("dist/discordRPC/checkupdate.exe", "./discordRPC/dist/checkupdate.exe")
+    zip.write("dist/discordRPC/runRPC.exe", "./discordRPC/dist/runRPC.exe")
     zip.write("dist/discordRPC/runRPC.bat", "./discordRPC/dist/runRPC.bat")
     zip.write("dist/discordRPC/version.json", "./discordRPC/dist/version.json")
     # zip.write("README.txt", "./README.txt")
