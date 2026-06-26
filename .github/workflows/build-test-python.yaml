@@ -1,8 +1,8 @@
-name: Build and release (develop)
+name: Build and release (test)
 
 on:
     push:
-        branches: [ "develop" ]
+        branches: [ "test" ]
 
     workflow_dispatch:
 
@@ -32,10 +32,10 @@ jobs:
         run: |
           pyinstaller build.spec
 
-      - name: "Publish develop build"
+      - name: "Publish test build"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete develop --yes --cleanup-tag || echo "no existing develop release"
-          gh release create develop --prerelease --title "Develop Build" --target develop --notes "Automated develop build from ${{ github.sha }}" LICENSE.TXT (Get-Item *.zip)
+          gh release delete test --yes --cleanup-tag || echo "no existing test release"
+          gh release create test --prerelease --title "Test Build" --target test --notes "Automated test build from ${{ github.sha }}" LICENSE.TXT (Get-Item *.zip)
         shell: pwsh
