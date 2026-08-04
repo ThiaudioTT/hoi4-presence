@@ -1,14 +1,17 @@
 name: Tests
 
 on:
-    push:
+    # No `push:` trigger: it duplicated every same-repo PR run, and pushes to
+    # main/test already reach this through the build workflows below.
     pull_request:
     workflow_dispatch:
     # Lets the build workflows gate their Windows build on this.
     workflow_call:
 
 concurrency:
-    group: tests-${{ github.ref }}
+    # github.workflow is the *caller's* name in a workflow_call run, which is what
+    # keeps a standalone run from cancelling the one a release build is waiting on.
+    group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
 jobs:

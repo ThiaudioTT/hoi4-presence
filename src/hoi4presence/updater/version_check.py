@@ -33,7 +33,8 @@ def parseManifest(text: str) -> dict:
 
     try:
         Version(manifest["version"])
-    except ValueError as error:
+    except (ValueError, TypeError) as error:
+        # TypeError: a non-string value, e.g. "version": 130 in a hand-edited file.
         raise ManifestError(f"{manifest['version']!r} is not a valid semantic version") from error
 
     return manifest

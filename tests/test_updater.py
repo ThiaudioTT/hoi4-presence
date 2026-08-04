@@ -46,6 +46,12 @@ def test_manifest_rejects_a_bad_version():
         parseManifest('{"version": "not-a-version"}')
 
 
+def test_manifest_rejects_a_non_string_version():
+    """Regression: Version(130) raises TypeError, which escaped ManifestError."""
+    with pytest.raises(ManifestError):
+        parseManifest('{"version": 130}')
+
+
 def test_manifest_rejects_invalid_json():
     with pytest.raises(ManifestError, match="JSON"):
         parseManifest("{nope}")

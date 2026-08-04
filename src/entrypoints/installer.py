@@ -49,6 +49,11 @@ BATCH_NAME = "runRPC.bat"
 SHIM_NAME = "runRPC.exe"
 PRESENCE_EXE = "hoi4Presence.exe"
 
+# cmd.exe reads a .bat in the console codepage, not UTF-8. Writing the documents
+# path as UTF-8 would corrupt any non-ASCII character in it -- and this rewrite
+# only happens for non-default paths, i.e. exactly the ones likely to have them.
+BATCH_ENCODING = "oem" if os.name == "nt" else "utf-8"
+
 IS_UPDATE = False
 
 
@@ -107,9 +112,13 @@ def main() -> int:
     if documents != defaultDocuments:
         print("Updating the runRPC.bat...\n")
         try:
-            lines = batchPath.read_text(encoding="utf-8").splitlines(keepends=True)
-            batchPath.write_text("".join(rewriteBatchDocumentsPath(lines, str(documents))), encoding="utf-8")
-        except OSError as error:
+            lines = batchPath.read_text(encoding=BATCH_ENCODING).splitlines(keepends=True)
+            batchPath.write_text(
+                "".join(rewriteBatchDocumentsPath(lines, str(documents))),
+                encoding=BATCH_ENCODING,
+            )
+        # ValueError covers both an empty runRPC.bat and an undecodable one.
+        except (OSError, ValueError) as error:
             return fail(f"{error}\nCan't change the runRPC.bat")
 
     # Copy the payload next to the saves.
@@ -130,7 +139,7 @@ def main() -> int:
         print(f"Writing save_as_binary=no in {SETTINGS_FILE}...")
         settings = settingsPath.read_text(encoding="utf-8")
         settingsPath.write_text(setBinarySaves(settings, enabled=False), encoding="utf-8")
-    except OSError as error:
+    except (OSError, ValueError) as error:
         return fail(f"{error}\nCan't change the {SETTINGS_FILE}", delay=3)
 
     # 3 - locate the game folder, recognised by hoi4.exe

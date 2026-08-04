@@ -23,9 +23,10 @@ def downloadUpdate(destination: str | None = None) -> str | None:
     Returns the directory it was unpacked into, or None when there is nothing to
     install or the download failed.
     """
-    destination = destination or os.environ["TEMP"]
-
     try:
+        # Inside the try: a missing TEMP is a failed update, not a traceback.
+        destination = destination or os.environ["TEMP"]
+
         release = requests.get(LATEST_RELEASE_URL, timeout=30).json()
         tagName = release["tag_name"]
 

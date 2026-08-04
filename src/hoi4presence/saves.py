@@ -19,8 +19,10 @@ import os
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
-# How many lines of the save to read. Everything we need is in the first five.
-HEADER_LINES = 5
+# How many lines of the save to read. Only five are needed today, but the parse is
+# key-driven, so reading a wider window costs nothing and keeps a HOI4 patch that
+# inserts one header field from pushing `difficulty` out of range.
+HEADER_LINES = 20
 
 # A save older than this is left over from a previous session, so the presence
 # ignores it rather than reporting a stale country.

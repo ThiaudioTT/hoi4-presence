@@ -46,7 +46,7 @@ def main() -> int:
         print(f"Writing save_as_binary=yes in {SETTINGS_FILE}...")
         settings = settingsPath.read_text(encoding="utf-8")
         settingsPath.write_text(setBinarySaves(settings, enabled=True), encoding="utf-8")
-    except OSError as error:
+    except (OSError, ValueError) as error:
         return fail(f"{error}\nCan't revert {SETTINGS_FILE}")
 
     gameFolder = findGameDir(defaultGameDir(), input, print)

@@ -76,7 +76,9 @@ for scriptPath, exeName, hasConsole in TARGETS:
 
 print("Starting to bundle...")
 
-DIST = os.path.join(SPECPATH, "dist")
+# DISTPATH is where PyInstaller actually wrote the exes -- it is cwd-relative and
+# --distpath can move it, so deriving it from SPECPATH would miss them.
+DIST = DISTPATH
 PAYLOAD = os.path.join(DIST, "discordRPC")
 
 os.makedirs(PAYLOAD, exist_ok=True)
@@ -94,7 +96,9 @@ for exeName in PAYLOAD_EXES:
     built = os.path.join(DIST, exeName)
     if os.path.exists(built):
         print(f"Moving {exeName}...")
-        shutil.move(built, os.path.join(PAYLOAD, exeName))
+        # os.replace, not shutil.move: move falls back to os.rename here, which
+        # raises on Windows when a previous build already left the file there.
+        os.replace(built, os.path.join(PAYLOAD, exeName))
 
 for sourcePath, name in EXTRA_FILES:
     print(f"Copying {name}...")

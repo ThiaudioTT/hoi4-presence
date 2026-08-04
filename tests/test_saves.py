@@ -43,6 +43,14 @@ def test_field_order_does_not_matter():
     assert parseSaveHeader(reordered) == SaveHeader("SOV", "communism", "1939.9.1.12", "normal")
 
 
+def test_an_extra_header_field_does_not_hide_the_last_one(tmp_path):
+    """A HOI4 patch inserting a field must not push difficulty out of the window."""
+    path = tmp_path / "patched.hoi4"
+    path.write_text(SAMPLE_HEADER.replace("player=", "new_field=1\nplayer="), encoding="utf-8")
+
+    assert parseSaveHeader(readSaveHeader(path)).difficulty == "normal"
+
+
 def test_truncated_header_raises_a_useful_error(dataDir):
     text = readSaveHeader(dataDir / "save_truncated.hoi4")
 
