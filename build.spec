@@ -1,256 +1,119 @@
 # -*- mode: python ; coding: utf-8 -*-
+"""PyInstaller spec: builds the five executables and packs them into a release zip.
 
+Run from the repository root with `pyinstaller build.spec`. This only works on
+Windows and is exercised in CI by the workflows in .github/workflows/.
+
+The exe names below are load-bearing -- runRPC.bat, the installer and the updater
+all refer to them as strings. Rename the source script, never the exe.
+"""
+
+import json
+import os
+import shutil
+import zipfile
 
 block_cipher = None
 
+# `src` on the analysis path is what lets the entry scripts import hoi4presence.
+# SPECPATH is injected by PyInstaller and points at this file's directory, so the
+# build does not depend on the working directory it was launched from.
+SRC_PATH = os.path.join(SPECPATH, "src")
+ENTRYPOINTS = os.path.join(SRC_PATH, "entrypoints")
 
-hoi4RPC_a = Analysis(
-    ['src/discordRPC/hoi4RPC.py'],
-    pathex=[],
-    binaries=[],
-    datas=[],
-    hiddenimports=[],
-    hookspath=[],
-    hooksconfig={},
-    runtime_hooks=[],
-    excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
-    noarchive=False,
-)
-hoi4RPC_pyz = PYZ(hoi4RPC_a.pure, hoi4RPC_a.zipped_data, cipher=block_cipher)
-hoi4RPC_exe = EXE(
-    hoi4RPC_pyz,
-    hoi4RPC_a.scripts,
-    hoi4RPC_a.binaries,
-    hoi4RPC_a.zipfiles,
-    hoi4RPC_a.datas,
-    [],
-    name='hoi4Presence',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    console=False,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-)
+# (entry script, exe name, needs a console window)
+TARGETS = [
+    (os.path.join(ENTRYPOINTS, "hoi4RPC.py"), "hoi4Presence", False),
+    (os.path.join(ENTRYPOINTS, "checkupdate.py"), "checkupdate", True),
+    (os.path.join(ENTRYPOINTS, "launcher.py"), "runRPC", False),
+    (os.path.join(ENTRYPOINTS, "installer.py"), "setup", True),
+    (os.path.join(ENTRYPOINTS, "uninstaller.py"), "uninstall", True),
+]
 
-checkupdate_a = Analysis(
-    ['src/checkupdate/checkupdate.py'],
-    pathex=[],
-    binaries=[],
-    datas=[],
-    hiddenimports=[],
-    hookspath=[],
-    hooksconfig={},
-    runtime_hooks=[],
-    excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
-    noarchive=False,
-)
-checkupdate_pyz = PYZ(checkupdate_a.pure, checkupdate_a.zipped_data, cipher=block_cipher)
-checkupdate_exe = EXE(
-    checkupdate_pyz,
-    checkupdate_a.scripts,
-    checkupdate_a.binaries,
-    checkupdate_a.zipfiles,
-    checkupdate_a.datas,
-    [],
-    name='checkupdate',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    console=True,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-)
+for scriptPath, exeName, hasConsole in TARGETS:
+    analysis = Analysis(
+        [scriptPath],
+        pathex=[SRC_PATH],
+        binaries=[],
+        datas=[],
+        hiddenimports=[],
+        hookspath=[],
+        hooksconfig={},
+        runtime_hooks=[],
+        excludes=[],
+        win_no_prefer_redirects=False,
+        win_private_assemblies=False,
+        cipher=block_cipher,
+        noarchive=False,
+    )
+    pyz = PYZ(analysis.pure, analysis.zipped_data, cipher=block_cipher)
+    EXE(
+        pyz,
+        analysis.scripts,
+        analysis.binaries,
+        analysis.zipfiles,
+        analysis.datas,
+        [],
+        name=exeName,
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=True,
+        upx_exclude=[],
+        runtime_tmpdir=None,
+        console=hasConsole,
+        disable_windowed_traceback=False,
+        argv_emulation=False,
+        target_arch=None,
+        codesign_identity=None,
+        entitlements_file=None,
+    )
 
-runRPC_a = Analysis(
-    ['src/launcher/launcher.py'],
-    pathex=[],
-    binaries=[],
-    datas=[],
-    hiddenimports=[],
-    hookspath=[],
-    hooksconfig={},
-    runtime_hooks=[],
-    excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
-    noarchive=False,
-)
-runRPC_pyz = PYZ(runRPC_a.pure, runRPC_a.zipped_data, cipher=block_cipher)
-runRPC_exe = EXE(
-    runRPC_pyz,
-    runRPC_a.scripts,
-    runRPC_a.binaries,
-    runRPC_a.zipfiles,
-    runRPC_a.datas,
-    [],
-    name='runRPC',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    console=False,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-)
 
-setup_a = Analysis(
-    ['src/setup.py'],
-    pathex=[],
-    binaries=[],
-    datas=[],
-    hiddenimports=[],
-    hookspath=[],
-    hooksconfig={},
-    runtime_hooks=[],
-    excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
-    noarchive=False,
-)
-setup_pyz = PYZ(setup_a.pure, setup_a.zipped_data, cipher=block_cipher)
-setup_exe = EXE(
-    setup_pyz,
-    setup_a.scripts,
-    setup_a.binaries,
-    setup_a.zipfiles,
-    setup_a.datas,
-    [],
-    name='setup',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    console=True,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-)
-
-uninstall_a = Analysis(
-    ['src/uninstall.py'],
-    pathex=[],
-    binaries=[],
-    datas=[],
-    hiddenimports=[],
-    hookspath=[],
-    hooksconfig={},
-    runtime_hooks=[],
-    excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
-    noarchive=False,
-)
-uninstall_pyz = PYZ(uninstall_a.pure, uninstall_a.zipped_data, cipher=block_cipher)
-uninstall_exe = EXE(
-    uninstall_pyz,
-    uninstall_a.scripts,
-    uninstall_a.binaries,
-    uninstall_a.zipfiles,
-    uninstall_a.datas,
-    [],
-    name='uninstall',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    console=True,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-)
-
-# script to bundle
+# --- Packaging -------------------------------------------------------------
+# Everything below runs after PyInstaller has written dist/, and assembles the
+# release zip. Written to be re-runnable without cleaning dist/ first.
 
 print("Starting to bundle...")
-import shutil
 
-# copy files 
-print("Copying runRPC.bat...")
-shutil.copy("src/runRPC.bat", "dist/runRPC.bat")
+DIST = os.path.join(SPECPATH, "dist")
+PAYLOAD = os.path.join(DIST, "discordRPC")
 
-print("Copying version.json...")
-shutil.copy("./version.json", "dist/version.json")
+os.makedirs(PAYLOAD, exist_ok=True)
 
-# todo: add readme.txt with instruction of the installation
+# Files that ship alongside the executables, copied straight into the payload.
+EXTRA_FILES = [
+    (os.path.join(SRC_PATH, "runRPC.bat"), "runRPC.bat"),
+    (os.path.join(SPECPATH, "version.json"), "version.json"),
+]
 
+# Executables that live inside discordRPC/; setup and uninstall stay at the root.
+PAYLOAD_EXES = ["hoi4Presence.exe", "checkupdate.exe", "runRPC.exe"]
 
-# Moving files
-# Note: probably we dont need it since we can zip the files directly from the dist folder, but is good for testing and development
-import os
-if not os.path.exists("dist/discordRPC"): os.mkdir("dist/discordRPC")
+for exeName in PAYLOAD_EXES:
+    built = os.path.join(DIST, exeName)
+    if os.path.exists(built):
+        print(f"Moving {exeName}...")
+        shutil.move(built, os.path.join(PAYLOAD, exeName))
 
-print("Moving hoi4Presence.exe...")
-shutil.move("dist/hoi4Presence.exe", "dist/discordRPC/hoi4Presence.exe")
+for sourcePath, name in EXTRA_FILES:
+    print(f"Copying {name}...")
+    shutil.copy(sourcePath, os.path.join(PAYLOAD, name))
 
-print("Moving checkupdate.exe...")
-shutil.move("dist/checkupdate.exe", "dist/discordRPC/checkupdate.exe")
+with open(os.path.join(SPECPATH, "version.json")) as versionFile:
+    version = json.load(versionFile)["version"]
 
-print("Moving runRPC.exe...")
-shutil.move("dist/runRPC.exe", "dist/discordRPC/runRPC.exe")
-
-print("Moving runRPC.bat...")
-shutil.move("dist/runRPC.bat", "dist/discordRPC/runRPC.bat")
-
-print("Moving version.json...")
-shutil.move("dist/version.json", "dist/discordRPC/version.json")
-
-# zipping files:
-print("Preparing to zip files...")
-import json
-import zipfile
-
-# reading version.json to get the version
-print("Getting version...")
-with open("./version.json", "r") as f: version = json.load(f)["version"]
-
-print("Version: " + version)
-
+print(f"Version: {version}")
 print("Zipping files...")
 
-# example of zip name: hoi4-presence-vVERSION.zip
-with zipfile.ZipFile("hoi4-presence-v" + version + ".zip", "w") as zip:
-    zip.write("dist/discordRPC/hoi4Presence.exe", "./discordRPC/dist/hoi4Presence.exe")
-    zip.write("dist/discordRPC/checkupdate.exe", "./discordRPC/dist/checkupdate.exe")
-    zip.write("dist/discordRPC/runRPC.exe", "./discordRPC/dist/runRPC.exe")
-    zip.write("dist/discordRPC/runRPC.bat", "./discordRPC/dist/runRPC.bat")
-    zip.write("dist/discordRPC/version.json", "./discordRPC/dist/version.json")
-    # zip.write("README.txt", "./README.txt")
-    zip.write("dist/setup.exe", "./setup.exe")
-    zip.write("dist/uninstall.exe", "./uninstall.exe")
+# The release asset name the updater looks for is derived from the release tag,
+# so a tag must be exactly "v<version>" for auto-update to find this. See AGENTS.md.
+zipName = os.path.join(SPECPATH, f"hoi4-presence-v{version}.zip")
 
-print("Done!")
+with zipfile.ZipFile(zipName, "w") as archive:
+    for name in PAYLOAD_EXES + [name for _, name in EXTRA_FILES]:
+        archive.write(os.path.join(PAYLOAD, name), f"./discordRPC/dist/{name}")
+    archive.write(os.path.join(DIST, "setup.exe"), "./setup.exe")
+    archive.write(os.path.join(DIST, "uninstall.exe"), "./uninstall.exe")
+
+print(f"Done! Wrote {zipName}")

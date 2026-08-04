@@ -1,0 +1,47 @@
+[project]
+name = "hoi4-presence"
+description = "Discord Rich Presence for Hearts of Iron IV"
+readme = "readme.md"
+license = { file = "LICENSE.TXT" }
+requires-python = ">=3.11"
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/ThiaudioTT/hoi4-presence"
+Issues = "https://github.com/ThiaudioTT/hoi4-presence/issues"
+
+# The project is not pip-installable; it ships as PyInstaller executables built
+# from build.spec. This file exists for the pytest and ruff configuration below.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "src/entrypoints"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = ["build.spec"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "W",    # pycodestyle warnings
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "F811", # redefinition (catches the duplicate `import time` class of bug)
+]
+ignore = [
+    "E501", # line length is handled by the formatter
+    "N802", # existing code uses camelCase function names; kept for continuity
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Entry points intentionally do work inside main(), not at import time.
+"src/entrypoints/*.py" = ["T201"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

@@ -10,14 +10,61 @@ I separated good first issues with the label [good first issue](https://github.c
 
 1. Fork the repository on GitHub
 2. Clone the forked repository to your local machine
-3. Install the dependencies with `pip install -r requirements.txt`
+3. Install the tooling with `pip install -r requirements-dev.txt`
 4. Start doing your changes
-5. Commit and push your changes to your forked repository
-6. Create a pull request to the original repository
-7. Wait for the pull request to be reviewed and merged
-8. Celebrate 🎉
+5. Run `pytest` and `ruff check .` — both must pass
+6. Commit and push your changes to your forked repository
+7. Create a pull request to the original repository
+8. Wait for the pull request to be reviewed and merged
+9. Celebrate 🎉
 
-### Attention after your changes
+`requirements-dev.txt` holds only what the tests and the linter need.
+`requirements.txt` holds what the executables need at runtime, and is what to
+install to build with `pyinstaller build.spec` (Windows only).
 
-1. Update the README.md with details of changes to the interface.
-2. Increase the version numbers in any examples files and the README.md to the new version that this Pull Request would represent. The versioning scheme we use is SemVer.
+## Running the code
+
+See the [Development section of the readme](readme.md#development) for running
+the presence against the sample save in `src/save games/`, and
+[docs/architecture.md](docs/architecture.md) for how the pieces fit together.
+
+[AGENTS.md](AGENTS.md) documents the repository layout and the constraints the
+code has to work within — worth reading before a larger change.
+
+## Attention after your changes
+
+1. **Tests and lint pass.** `pytest` and `ruff check .`, plus `ruff format .` to
+   apply formatting. CI runs all three and blocks the release build if any fail.
+2. **New logic comes with a test.** The pure, testable parts live in
+   `src/hoi4presence/`; the scripts in `src/entrypoints/` stay thin enough that
+   they need no tests of their own beyond the structural ones in
+   `tests/test_packaging.py`.
+3. **Update the docs** for anything a user or a contributor sees: `readme.md` for
+   behaviour and settings, `docs/architecture.md` for the flow.
+4. **Add a `CHANGELOG.md` entry** under `Unreleased`.
+
+## Versioning and releases
+
+The versioning scheme is [SemVer](https://semver.org/). The version lives in
+exactly one place: **`version.json` at the repository root**. `build.spec` reads
+it to name the release zip, and the updater compares it against the published
+copy. Do not duplicate it anywhere else.
+
+To bump a version: edit `version.json`, move the `Unreleased` entries in
+`CHANGELOG.md` under the new version, and open a PR.
+
+Release lanes:
+
+| Branch | Result |
+| --- | --- |
+| `main` | rolling `development` prerelease |
+| `test` | rolling `test` prerelease, also runnable via *Run workflow* |
+
+Both build workflows depend on the test workflow, so a red suite never ships.
+Stable `vX.Y.Z` releases are still tagged by hand. The tag must be exactly
+`v<version>` — the auto-updater looks for an asset named
+`hoi4-presence-v<version>.zip` and silently finds nothing if it differs.
+
+Push to `test` whenever you change `build.spec`, the entry-point scripts, or the
+package layout: that lane is the only thing that proves the Windows build still
+works.

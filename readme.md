@@ -6,9 +6,10 @@ Hoi4 Rich Presence
 
 [![Download - Latest Release](https://img.shields.io/badge/Download-Latest_Release-2ea44f?style=for-the-badge)](https://github.com/ThiaudioTT/hoi4-presence/releases/latest)
 
-![demonstration](/tests/demo.PNG)
+![demonstration](docs/demo.PNG)
 
 ![WindowsOnly](https://img.shields.io/badge/Only-blue?logo=Windows&style=flat&label=Windows)
+[![Tests](https://github.com/ThiaudioTT/hoi4-presence/actions/workflows/test.yaml/badge.svg)](https://github.com/ThiaudioTT/hoi4-presence/actions/workflows/test.yaml)
 ![GithubStars](https://img.shields.io/github/stars/thiaudiott/hoi4-presence?logo=github)
 ![GithubIssues](https://img.shields.io/github/issues/thiaudiott/hoi4-presence?logo=github)
 ![GitHub last commit](https://img.shields.io/github/last-commit/thiaudiott/hoi4-presence?logo=github)
@@ -31,6 +32,16 @@ This is a presence for discord that shows what you are doing in Hearts of Iron 4
 
 Struggling in installing? See the [Wiki](https://github.com/ThiaudioTT/hoi4-presence/wiki/Downloading,-Installing-and-Uninstalling).
 
+Briefly: download the latest release, unzip it, and run `setup.exe`. The installer
+
+- copies the presence into `Documents\Paradox Interactive\Hearts of Iron IV\hoi4Presence`,
+- sets `save_as_binary=no` in the game's `settings.txt`, because the presence reads your
+  autosaves and can only do that when they are plaintext,
+- drops `runRPC.exe` and `runRPC.bat` into your game folder, and
+- points the Paradox launcher at `runRPC.exe`, which starts the game and the presence together.
+
+Run `uninstall.exe` to reverse all of that.
+
 ## Known issues
 
 HOI4 is frequently updating, see known issues in [Issues](https://github.com/ThiaudioTT/hoi4-presence/labels/bug).
@@ -38,6 +49,10 @@ HOI4 is frequently updating, see known issues in [Issues](https://github.com/Thi
 ## Submiting an issue
 
 Found a bug? [Submit it](https://github.com/ThiaudioTT/hoi4-presence/issues/new/choose).
+
+If the presence is not showing up, attach `hoi4Presence.log` from the
+`hoi4Presence` folder in your documents directory — it records why an update was
+skipped.
 
 ## Contributing
 
@@ -49,7 +64,54 @@ First, read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 It uses the saves to get data. So, spend one month in the game or save the game to update the presence.
 
-See: [How it Works](https://github.com/ThiaudioTT/hoi4-presence/wiki/How-it-works)
+See: [How it Works](https://github.com/ThiaudioTT/hoi4-presence/wiki/How-it-works), and
+[docs/architecture.md](docs/architecture.md) for the developer-facing version.
+
+## Settings
+
+`version.json`, next to the executables, holds the only user-tunable setting:
+
+```json
+{
+    "version": "1.3.0",
+    "auto-update": true
+}
+```
+
+Set `auto-update` to `false` to stop the presence updating itself when a newer
+release is published. Do not edit `version`; the updater compares it against the
+published one.
+
+## Development
+
+Requires Python 3.11+. The test suite runs on any platform; building the
+executables only works on Windows.
+
+```sh
+pip install -r requirements-dev.txt   # test + lint tooling
+pytest                                # run the suite
+ruff check . && ruff format .         # lint and format
+```
+
+To run the presence from source, put a **non-binary** `.hoi4` save in
+`src/save games/` (there is a sample there already), make sure Discord is
+running, then:
+
+```sh
+python src/entrypoints/hoi4RPC.py
+```
+
+It reports the newest save in that folder, as long as it was modified in the last
+two minutes, and exits once `hoi4.exe` is no longer running.
+
+To build the executables and the release zip, on Windows:
+
+```sh
+pip install -r requirements.txt
+pyinstaller build.spec
+```
+
+See [AGENTS.md](AGENTS.md) for the repository map and the constraints to work within.
 
 ## Image sources
 

@@ -10,7 +10,12 @@ permissions:
   contents: write
 
 jobs:
+  # Gate the build on the suite; a red test must not ship a release.
+  test:
+    uses: ./.github/workflows/test.yaml
+
   build:
+    needs: test
 
     runs-on: windows-latest
     strategy:
@@ -18,9 +23,9 @@ jobs:
         python-version: ["3.11"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
