@@ -6,6 +6,9 @@ on:
 
     # workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   # Gate the build on the suite; a red test must not ship a release.
   test:
@@ -34,14 +37,10 @@ jobs:
         run: |
           pyinstaller build.spec
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "development"
-          # prerelease: false
-          prerelease: true
-          # draft: true
-          title: "Development Build"
-          files: |
-            LICENSE.TXT
-            *.zip
+      - name: "Publish beta release"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete beta --yes --cleanup-tag || echo "no existing beta release"
+          gh release create beta --prerelease --title "Beta release" --target main --notes "feature-complete-ish, but still being tested.`n`nAutomated build from ${{ github.sha }}" LICENSE.TXT (Get-Item *.zip)
+        shell: pwsh

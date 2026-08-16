@@ -7,6 +7,7 @@ imports cleanly on Linux CI where ``USERPROFILE`` does not exist.
 
 from __future__ import annotations
 
+import glob
 import os
 import sys
 from collections.abc import Callable, Mapping
@@ -49,8 +50,13 @@ def getSavePath(baseDir: str | os.PathLike[str]) -> str:
     in ``<documents>/save games``. Running from source, the entry point lives in
     ``src/entrypoints`` and the sample saves in ``src/save games``. The same
     ``../save games`` hop covers both.
+
+    Only ``SAVE_GLOB`` is left as a pattern: a documents folder containing
+    brackets, such as ``D:\\Games [SSD]``, would otherwise be read as a glob
+    character class and match no save at all.
     """
-    return os.path.abspath(os.path.join(baseDir, "..", SAVE_DIR_NAME, SAVE_GLOB))
+    saveDir = os.path.abspath(os.path.join(baseDir, "..", SAVE_DIR_NAME))
+    return os.path.join(glob.escape(saveDir), SAVE_GLOB)
 
 
 def defaultDocumentsDir(env: Mapping[str, str] | None = None) -> Path:
@@ -81,7 +87,7 @@ def findDirContaining(
     current = Path(start)
     while True:
         if current.is_dir():
-            if marker in os.listdir(current):
+            if (current / marker).exists():
                 return current
             reason = f"Could not find {marker!r} in {str(current)!r}"
             label = repr(marker)
@@ -91,7 +97,10 @@ def findDirContaining(
 
         if log is not None:
             log(reason)
-        current = Path(prompt(f"Can't find {label}, please enter the path manually: "))
+        # Explorer's "Copy as path" wraps the path in quotes, which would never
+        # resolve and would leave the user re-prompted forever.
+        answer = prompt(f"Can't find {label}, please enter the path manually: ")
+        current = Path(answer.strip().strip('"'))
 
 
 def findDocumentsDir(

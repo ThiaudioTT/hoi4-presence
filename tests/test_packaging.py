@@ -86,6 +86,21 @@ def test_the_release_asset_name_matches_the_build_output(repoRoot):
     assert assetName(f"v{version}") == f"hoi4-presence-v{version}.zip"
 
 
+def test_the_batch_file_resolves_the_documents_folder_from_the_profile(repoRoot):
+    """Regression: %USERNAME% is not always the name of the profile folder.
+
+    A renamed account, a domain profile or a profile on another drive left the
+    batch file pointing at a path that does not exist, so neither the presence
+    nor the updater ever started -- while the game did, because it is launched
+    from a relative path. The installer builds its default from %USERPROFILE%,
+    so the batch file has to agree.
+    """
+    firstLine = (repoRoot / "src" / "runRPC.bat").read_text(encoding="utf-8").splitlines()[0]
+
+    assert "%USERPROFILE%" in firstLine
+    assert "%USERNAME%" not in firstLine
+
+
 def test_workflows_reference_the_licence_file_that_exists(repoRoot):
     """The on-disk file is LICENSE.TXT; a lowercase reference only works by luck."""
     for workflow in (repoRoot / ".github" / "workflows").glob("*.yaml"):

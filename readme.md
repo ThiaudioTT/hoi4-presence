@@ -9,7 +9,7 @@ Hoi4 Rich Presence
 ![demonstration](docs/demo.PNG)
 
 ![WindowsOnly](https://img.shields.io/badge/Only-blue?logo=Windows&style=flat&label=Windows)
-[![Tests](https://github.com/ThiaudioTT/hoi4-presence/actions/workflows/test.yaml/badge.svg)](https://github.com/ThiaudioTT/hoi4-presence/actions/workflows/test.yaml)
+[![Build](https://github.com/ThiaudioTT/hoi4-presence/actions/workflows/build-release-python.yaml/badge.svg)](https://github.com/ThiaudioTT/hoi4-presence/actions/workflows/build-release-python.yaml)
 ![GithubStars](https://img.shields.io/github/stars/thiaudiott/hoi4-presence?logo=github)
 ![GithubIssues](https://img.shields.io/github/issues/thiaudiott/hoi4-presence?logo=github)
 ![GitHub last commit](https://img.shields.io/github/last-commit/thiaudiott/hoi4-presence?logo=github)
@@ -50,9 +50,10 @@ HOI4 is frequently updating, see known issues in [Issues](https://github.com/Thi
 
 Found a bug? [Submit it](https://github.com/ThiaudioTT/hoi4-presence/issues/new/choose).
 
-If the presence is not showing up, attach `hoi4Presence.log` from the
-`hoi4Presence` folder in your documents directory — it records why an update was
-skipped.
+If the presence is not showing up, attach `hoi4Presence.log` and
+`checkupdate.log` from the `hoi4Presence` folder in your documents directory.
+The first records why no save was read or why Discord could not be reached, the
+second why an update was skipped.
 
 ## Contributing
 

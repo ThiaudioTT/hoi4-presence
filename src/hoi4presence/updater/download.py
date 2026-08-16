@@ -1,4 +1,4 @@
-"""Downloading and unpacking the latest release from GitHub."""
+"""Downloading and unpacking a published release from GitHub."""
 
 from __future__ import annotations
 
@@ -12,13 +12,18 @@ from hoi4presence.updater.release import assetName, formatProgress, pickReleaseA
 
 logger = logging.getLogger(__name__)
 
-LATEST_RELEASE_URL = "https://api.github.com/repos/ThiaudioTT/hoi4-presence/releases/latest"
+# Fetched by tag rather than through /releases/latest. The version that triggers
+# an update comes from version.json on main, and /releases/latest can resolve to
+# a different release -- a rolling prerelease such as "beta", or the
+# previous stable one while the new tag has not been pushed yet. Downloading that
+# reinstalls the version the user already has, on every single launch.
+RELEASE_BY_TAG_URL = "https://api.github.com/repos/ThiaudioTT/hoi4-presence/releases/tags/{tagName}"
 
 CHUNK_SIZE = 1024**2
 
 
-def downloadUpdate(destination: str | None = None) -> str | None:
-    """Download and unpack the newest release.
+def downloadUpdate(tagName: str, destination: str | None = None) -> str | None:
+    """Download and unpack the release published as ``tagName``.
 
     Returns the directory it was unpacked into, or None when there is nothing to
     install or the download failed.
@@ -27,19 +32,18 @@ def downloadUpdate(destination: str | None = None) -> str | None:
         # Inside the try: a missing TEMP is a failed update, not a traceback.
         destination = destination or os.environ["TEMP"]
 
-        release = requests.get(LATEST_RELEASE_URL, timeout=30).json()
-        tagName = release["tag_name"]
+        release = requests.get(RELEASE_BY_TAG_URL.format(tagName=tagName), timeout=30)
+        if release.status_code == 404:
+            # version.json on main is bumped when the branch merges; the tag is
+            # pushed afterwards. Between the two there is simply nothing to get.
+            logger.info("No release tagged %s has been published yet; nothing to install.", tagName)
+            return None
+        # Without this, a rate-limited 403 body is parsed as a release and fails
+        # later as an unexplained KeyError.
+        release.raise_for_status()
 
-        assets = requests.get(
-            release["assets_url"],
-            headers={"accept": "application/vnd.github+json"},
-            timeout=30,
-        ).json()
-
-        downloadLink = pickReleaseAsset(assets, tagName)
+        downloadLink = pickReleaseAsset(release.json().get("assets", []), tagName)
         if downloadLink is None:
-            # Happens whenever /releases/latest resolves to a rolling prerelease
-            # tag such as "development", whose asset name never matches.
             logger.info("Release %s has no asset named %s; nothing to install.", tagName, assetName(tagName))
             return None
 
@@ -62,6 +66,7 @@ def downloadUpdate(destination: str | None = None) -> str | None:
 
         extractedPath = os.path.join(destination, f"hoi4-presence-{tagName}")
         shutil.unpack_archive(archivePath, extractedPath)
+        os.remove(archivePath)
         return extractedPath
 
     except Exception:

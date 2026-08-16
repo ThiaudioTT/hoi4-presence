@@ -15,6 +15,7 @@ from hoi4presence.paths import (
     getBaseDir,
     getSavePath,
 )
+from hoi4presence.saves import findSaves
 
 
 def test_base_dir_when_frozen_is_next_to_the_executable(monkeypatch, tmp_path):
@@ -35,6 +36,21 @@ def test_save_path_is_a_sibling_save_games_glob(tmp_path):
     parts = Path(getSavePath(tmp_path / "hoi4Presence")).parts
 
     assert parts[-2:] == ("save games", "*.hoi4")
+
+
+def test_brackets_in_the_documents_path_still_match_saves(tmp_path):
+    """Regression: `D:\\Games [SSD]` was read as a glob character class.
+
+    glob.glob then matched nothing, so the presence sat on the idle payload for
+    the whole session with no error anywhere.
+    """
+    saveDir = tmp_path / "Games [SSD]" / "save games"
+    saveDir.mkdir(parents=True)
+    (saveDir / "GER.hoi4").write_text("HOI4txt\n", encoding="utf-8")
+
+    found = findSaves(getSavePath(tmp_path / "Games [SSD]" / "hoi4Presence"))
+
+    assert [Path(path).name for path in found] == ["GER.hoi4"]
 
 
 def test_default_documents_dir_reads_the_given_environment(fakeEnv):
@@ -123,6 +139,17 @@ def test_rejections_are_reported_to_the_log_callback(tmp_path, scriptedInput):
     findDocumentsDir(tmp_path / "nope", scriptedInput([str(good)]), messages.append)
 
     assert messages and "nope" in messages[0]
+
+
+def test_a_path_pasted_with_quotes_is_accepted(tmp_path, scriptedInput):
+    """Explorer's "Copy as path" wraps the path in quotes, which never resolved."""
+    good = tmp_path / "good"
+    good.mkdir()
+    (good / SETTINGS_FILE).write_text("", encoding="utf-8")
+
+    prompt = scriptedInput([f'  "{good}"  '])
+
+    assert findDocumentsDir(tmp_path / "nope", prompt) == good
 
 
 def test_missing_windows_env_raises_a_keyerror(monkeypatch):

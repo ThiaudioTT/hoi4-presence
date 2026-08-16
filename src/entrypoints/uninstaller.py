@@ -12,7 +12,13 @@ import json
 import shutil
 import time
 
-from hoi4presence.install.steps import setBinarySaves, setLauncherExe
+from hoi4presence.install.steps import (
+    BATCH_NAME,
+    LAUNCHER_SETTINGS,
+    SHIM_NAME,
+    setBinarySaves,
+    setLauncherExe,
+)
 from hoi4presence.paths import (
     INSTALL_DIR_NAME,
     SETTINGS_FILE,
@@ -21,10 +27,6 @@ from hoi4presence.paths import (
     findDocumentsDir,
     findGameDir,
 )
-
-LAUNCHER_SETTINGS = "launcher-settings.json"
-BATCH_NAME = "runRPC.bat"
-SHIM_NAME = "runRPC.exe"
 
 
 def fail(message: str, *, delay: int = 3) -> int:
@@ -66,7 +68,9 @@ def main() -> int:
 
     try:
         print("Deleting rich presence")
-        shutil.rmtree(documents / INSTALL_DIR_NAME)
+        # ignore_errors so a second run, or one after the folder was deleted by
+        # hand, still clears the two files left in the game folder below.
+        shutil.rmtree(documents / INSTALL_DIR_NAME, ignore_errors=True)
         (gameFolder / BATCH_NAME).unlink(missing_ok=True)
         (gameFolder / SHIM_NAME).unlink(missing_ok=True)
     except OSError as error:

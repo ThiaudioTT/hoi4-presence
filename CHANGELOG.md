@@ -17,13 +17,20 @@ summaries rather than a complete record.
   path discovery, the updater and the installer transforms.
 - A `Tests` workflow running ruff and pytest on Linux and Windows. Both build
   workflows now depend on it, so a failing suite no longer ships a release.
-- The presence and the updater write a rotating `hoi4Presence.log` next to the
-  executable. They are built without a console window, so until now every error
-  message and every swallowed exception went nowhere.
+- The presence writes a rotating `hoi4Presence.log` next to the executable and
+  the updater writes `checkupdate.log` beside it. They are built without a
+  console window, so until now every error message and every swallowed
+  exception went nowhere.
 - `AGENTS.md`, `docs/architecture.md` and this changelog.
 
 ### Changed
 
+- The release lanes were renamed. `main` now publishes a `beta` prerelease
+  titled "Beta release" instead of the `development` one, and the `test` lane
+  moved to the `dev` branch as a `dev` prerelease titled "Testers build". Both
+  carry a description saying what the build is for. The `main` lane publishes
+  through the `gh` CLI now, like the other one; the archived
+  `marvinpinto/action-automatic-releases` had no way to set release notes.
 - Reorganised the source into a `hoi4presence` package with the entry-point
   scripts in `src/entrypoints/`. Nothing runs at import time any more; each
   executable has a `main()`. The built executable names are unchanged.
@@ -34,6 +41,20 @@ summaries rather than a complete record.
   was silently discarded.
 - The installer and uninstaller share their directory-discovery and settings
   transforms instead of duplicating roughly forty lines between them.
+- The presence opens its Discord connection inside the poll loop instead of once
+  at startup, so Discord not being up yet — or restarting mid-session — is a
+  retry rather than the end of the session.
+- The updater fetches the release **by tag** (`/releases/tags/v<version>`) rather
+  than through `/releases/latest`, using the version it already read from
+  `version.json`. This also drops a second GitHub API request per check, since
+  the release payload already carries its assets.
+- The installer always rewrites the documents path in `runRPC.bat` instead of
+  only doing so for non-default folders.
+- `runRPC.bat` derives the documents folder from `%USERPROFILE%` rather than
+  `C:\Users\%USERNAME%`.
+- The filenames shared by the installer, the uninstaller and the payload check
+  (`runRPC.bat`, `runRPC.exe`, `hoi4Presence.exe`, `launcher-settings.json`) are
+  defined once in `hoi4presence.install.steps`.
 
 ### Fixed
 
@@ -51,6 +72,39 @@ summaries rather than a complete record.
   `0.1.0` version stub and tries to install a "newer" release over a
   developer's working copy.
 - The release workflow referenced `LICENSE.txt`; the file is `LICENSE.TXT`.
+- `runRPC.bat` built the documents path from `%USERNAME%` while the installer
+  decided whether to rewrite it by comparing against `%USERPROFILE%`. Where the
+  profile folder name differs from the account name — a renamed account, a
+  domain profile, a profile on another drive — the installer reported success
+  and neither the presence nor the updater ever started, with no log to say why.
+- Finishing an auto-update started `runRPC.exe`, which runs `runRPC.bat`, which
+  starts `hoi4.exe` — a second copy of the game on top of the one being played.
+  It now starts the presence itself.
+- `taskkill` exits 128 when the target is not running, and the installer treated
+  any non-zero code as fatal, so an auto-update aborted whenever the presence
+  had already exited. The kill is best-effort now.
+- The auto-updater passed the real `input()` to the folder-discovery loop, so a
+  user whose documents or game folder was not at the default left `setup.exe`
+  waiting forever on a console nobody was looking at — after it had already
+  stopped the running presence. It now fails with a logged reason.
+- A documents folder containing `[` or `]`, such as `D:\Games [SSD]`, was read as
+  a glob character class, so no save ever matched and the presence stayed on the
+  idle payload for the whole session.
+- The two diagnostics that explain a stuck presence — no save matched, newest
+  save too old — were logged below the log file's level, so the log users are
+  asked to attach was empty in exactly that case.
+- A path pasted from Explorer's "Copy as path" arrives wrapped in quotes, which
+  never resolved, so the installer re-prompted forever.
+- Uninstalling twice, or after the install folder had been deleted by hand,
+  aborted on the folder removal and left `runRPC.bat` and `runRPC.exe` in the
+  game folder.
+- The installer resolved its payload from the working directory, so "Run as
+  administrator" made it look in `System32`. It now looks next to `setup.exe`.
+- A GitHub API error, such as a rate-limited 403, was parsed as a release and
+  surfaced later as an unexplained `KeyError`.
+- The downloaded release zip is deleted from `%TEMP%` after it is unpacked.
+- The installer no longer tells the user to delete the folder holding the only
+  copy of `uninstall.exe`.
 
 ### Removed
 
@@ -58,17 +112,28 @@ summaries rather than a complete record.
   `openfileNOBinary.py`, `path.py`, `time.py`, `echoDocument.bat`); it is a real
   test suite now. `tests/demo.PNG` moved to `docs/demo.PNG`.
 - The stale `src/checkupdate/version.json` development stub.
+- `tools/getVanillaCountries.py`, the one-shot wiki scraper whose output was
+  merged into `countries.py` by hand years ago. It imported `requests`, which
+  `requirements-dev.txt` does not install, so it could not run at all under the
+  documented development setup, and its wiki selectors were positional. The
+  `beautifulsoup4` development dependency went with it.
+- The `pypresence` signature check in `tests/test_presence.py`, which was skipped
+  in every environment that runs the suite and therefore never guarded anything.
+  The payload key set is asserted directly instead.
 
 ### Known issues
 
-- The auto-updater looks for a release asset named
-  `hoi4-presence-{tag_name}.zip` while the build produces
-  `hoi4-presence-v{version}.zip`. These only agree when a release tag is exactly
-  `v<version>`; both CI lanes publish to the rolling tags `development` and
-  `test`, so a client whose `/releases/latest` resolves to one of those finds no
-  asset and does nothing.
+- A stable release tag still has to be exactly `v<version>`: the asset name the
+  updater looks for is derived from it. The updater no longer mistakes the
+  rolling `development` and `test` prereleases for an update, because it asks
+  for the tag matching `version.json` rather than for `/releases/latest`.
 - `runRPC.bat` is an indirection the launcher shim could absorb, but it is still
   referenced by the installer, the uninstaller and `build.spec`.
+- 146 of the 172 URL-based country flags point at `hoi4.paradoxwikis.com`, which
+  now answers every image request with an anti-bot challenge page rather than the
+  PNG. Those countries almost certainly render without a flag in Discord. The 25
+  `i.imgur.com` links and the 92 Discord developer-portal asset keys are
+  unaffected. Re-hosting them is a data migration and belongs in its own change.
 
 ## [1.3.0]
 

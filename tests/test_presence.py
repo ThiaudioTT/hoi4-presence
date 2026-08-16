@@ -40,19 +40,15 @@ def test_idle_payload_has_no_country():
     }
 
 
-def test_payload_keys_are_accepted_by_pypresence():
-    """Guards against pypresence renaming an update() keyword under us."""
-    import inspect
+def test_payloads_use_only_the_expected_pypresence_keywords():
+    """A keyword pypresence does not accept raises TypeError inside the loop.
 
-    pypresence = __import__("importlib").util.find_spec("pypresence")
-    if pypresence is None:
-        import pytest
+    Frozen set rather than pypresence's own signature: no lane that runs pytest
+    installs pypresence, so the signature check this replaces was skipped in
+    every environment and never guarded anything. This at least pins the payload
+    shape, so a stray key cannot be added without a decision.
+    """
+    expected = {"state", "details", "large_image", "large_text", "small_image", "small_text", "start"}
 
-        pytest.skip("pypresence is not installed")
-
-    from pypresence import Presence
-
-    accepted = set(inspect.signature(Presence.update).parameters)
-    used = set(buildPresence(getCountry("GER"), HEADER, START)) | set(buildIdlePresence(START))
-
-    assert used <= accepted, f"payload keys pypresence does not accept: {sorted(used - accepted)}"
+    assert set(buildPresence(getCountry("GER"), HEADER, START)) == expected
+    assert set(buildIdlePresence(START)) <= expected

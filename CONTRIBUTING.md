@@ -57,14 +57,14 @@ Release lanes:
 
 | Branch | Result |
 | --- | --- |
-| `main` | rolling `development` prerelease |
-| `test` | rolling `test` prerelease, also runnable via *Run workflow* |
+| `main` | rolling `beta` prerelease, "Beta release" |
+| `dev` | rolling `dev` prerelease, "Testers build", also runnable via *Run workflow* |
 
 Both build workflows depend on the test workflow, so a red suite never ships.
 Stable `vX.Y.Z` releases are still tagged by hand. The tag must be exactly
 `v<version>` — the auto-updater looks for an asset named
 `hoi4-presence-v<version>.zip` and silently finds nothing if it differs.
 
-Push to `test` whenever you change `build.spec`, the entry-point scripts, or the
+Push to `dev` whenever you change `build.spec`, the entry-point scripts, or the
 package layout: that lane is the only thing that proves the Windows build still
 works.

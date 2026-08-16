@@ -25,22 +25,18 @@ extend-exclude = ["build.spec"]
 
 [tool.ruff.lint]
 select = [
-    "E",    # pycodestyle errors
-    "F",    # pyflakes
-    "W",    # pycodestyle warnings
-    "I",    # isort
-    "UP",   # pyupgrade
-    "B",    # bugbear
-    "F811", # redefinition (catches the duplicate `import time` class of bug)
+    "E",  # pycodestyle errors
+    "F",  # pyflakes -- includes F811, the duplicate `import time` class of bug
+    "W",  # pycodestyle warnings
+    "I",  # isort
+    "UP", # pyupgrade
+    "B",  # bugbear
 ]
+# `N` (pep8-naming) is deliberately not selected: function names here are
+# camelCase throughout. See the conventions section of AGENTS.md.
 ignore = [
     "E501", # line length is handled by the formatter
-    "N802", # existing code uses camelCase function names; kept for continuity
 ]
-
-[tool.ruff.lint.per-file-ignores]
-# Entry points intentionally do work inside main(), not at import time.
-"src/entrypoints/*.py" = ["T201"]
 
 [tool.ruff.format]
 quote-style = "double"

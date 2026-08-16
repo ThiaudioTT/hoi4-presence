@@ -49,11 +49,19 @@ control.
 2. take the most recently modified one;
 3. skip it unless it was modified in the last **120 seconds**, so a save left
    over from a previous session is not reported as current;
-4. read the first **5 lines**, then close the handle immediately — HOI4 needs
-   write access to the file it is autosaving into;
+4. read the first **20 lines**, then close the handle immediately — HOI4 needs
+   write access to the file it is autosaving into. Only five of those lines are
+   used; the wider window keeps a HOI4 patch that inserts a header field from
+   pushing `difficulty` out of range;
 5. parse those lines into a `SaveHeader`, map the tag to a `Country`, and push
    the payload to Discord;
 6. exit once `hoi4.exe` is no longer in the process list.
+
+The Discord connection is opened *inside* the loop, not once up front. Discord
+is started by the user rather than by us, so it may not be up when the game
+launches, and it restarts itself often enough that a session-long connection
+cannot be assumed. A failed update drops the connection so the next poll
+reconnects; a failed save read does not, because reconnecting would not help.
 
 Those constants live at the top of `hoi4presence.saves` and
 `hoi4presence.runner`.
@@ -87,20 +95,24 @@ and the image comes in two flavours:
 - **a full URL**, mostly to the HOI4 wiki, for releasable countries that the
   portal does not host.
 
-`tools/getVanillaCountries.py` scraped the initial table; its output was merged
-into `countries.py` by hand. It is a one-shot dev tool, not part of the build.
-
 ## Updating
 
-`checkupdate.exe` runs alongside the game. It compares the local `version.json`
-with the copy on `main`, and if `auto-update` is on and the local one is older it
-downloads the release asset, unpacks it to `%TEMP%` and hands over to
-`setup.exe -update`, which reinstalls without prompting and restarts the
-presence.
+`checkupdate.exe` runs alongside the game and writes its own `checkupdate.log`
+— it and `hoi4Presence.exe` start together, and a `RotatingFileHandler` shared
+between two processes breaks on rollover.
 
-The asset name is derived from the release tag, so a stable release tag has to be
-exactly `v<version>` to match what `build.spec` produces. See the known-issues
-note in [AGENTS.md](../AGENTS.md).
+It compares the local `version.json` with the copy on `main`, and if
+`auto-update` is on and the local one is older it fetches the release tagged
+`v<that version>`, unpacks it to `%TEMP%` and hands over to `setup.exe -update`,
+which reinstalls without prompting and restarts the presence.
+
+The release is fetched **by tag**, not through `/releases/latest`. Those are two
+different things: the version that triggers an update comes from `version.json`
+on `main`, while `/releases/latest` can resolve to a rolling prerelease such as
+`beta`, or to the previous stable release while the new tag has not been
+pushed yet — whose asset would reinstall the version the user already has, on
+every launch. Fetching by tag also means the tag has to be exactly `v<version>`,
+which is what `build.spec` names the zip.
 
 ## Building
 

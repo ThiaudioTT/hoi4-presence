@@ -24,10 +24,15 @@ if not getattr(sys, "frozen", False):
 import json
 import os
 import shutil
+import subprocess
 import time
 
 from hoi4presence.install.steps import (
+    BATCH_NAME,
+    LAUNCHER_SETTINGS,
+    PRESENCE_EXE,
     REQUIRED_DIST_FILES,
+    SHIM_NAME,
     findMissingFiles,
     isUpdateMode,
     rewriteBatchDocumentsPath,
@@ -41,13 +46,10 @@ from hoi4presence.paths import (
     defaultGameDir,
     findDocumentsDir,
     findGameDir,
+    getBaseDir,
 )
 
 SOURCE_SUBPATH = Path("discordRPC") / "dist"
-LAUNCHER_SETTINGS = "launcher-settings.json"
-BATCH_NAME = "runRPC.bat"
-SHIM_NAME = "runRPC.exe"
-PRESENCE_EXE = "hoi4Presence.exe"
 
 # cmd.exe reads a .bat in the console codepage, not UTF-8. Writing the documents
 # path as UTF-8 would corrupt any non-ASCII character in it -- and this rewrite
@@ -62,6 +64,18 @@ def customInput(prompt: str = "") -> str | None:
     if not IS_UPDATE:
         return input(prompt)
     return None
+
+
+def promptForPath(prompt: str) -> str:
+    """Ask the user where a folder is. The auto-updater has nobody to ask.
+
+    Raising here rather than blocking matters: an auto-update runs behind the
+    game with a console the user is not looking at, and it has already stopped
+    the running presence by this point.
+    """
+    if IS_UPDATE:
+        raise RuntimeError("Cannot ask for a folder during an auto-update.")
+    return input(prompt)
 
 
 def fail(message: str, *, delay: int = 10) -> int:
@@ -85,7 +99,10 @@ def main() -> int:
     print("This script will install the hoi4-presence in your game/save path\nPress enter to continue...")
     customInput()
 
-    source = Path(os.path.abspath(os.curdir)) / SOURCE_SUBPATH
+    # Next to setup.exe, not in the working directory: "Run as administrator"
+    # launches with cwd set to System32, and the auto-updater launches setup.exe
+    # from the folder it unpacked into.
+    source = getBaseDir() / SOURCE_SUBPATH
 
     print("Verifying required files...")
     missing = verifyPayload(source)
@@ -97,29 +114,32 @@ def main() -> int:
 
     if IS_UPDATE:
         print("Stopping any running instances of hoi4Presence.exe...")
-        if os.system(f"taskkill /f /im {PRESENCE_EXE}") != 0:
-            return fail("Error occurred while terminating the process.", delay=3)
-        print("Process terminated successfully.")
+        # Best effort: taskkill exits 128 when the process is not running, which
+        # is the normal case -- the presence exits as soon as the game does.
+        subprocess.run(["taskkill", "/f", "/im", PRESENCE_EXE], capture_output=True)
 
     # 1 - locate the documents folder, recognised by settings.txt
-    defaultDocuments = defaultDocumentsDir()
-    documents = findDocumentsDir(defaultDocuments, input, print)
+    try:
+        documents = findDocumentsDir(defaultDocumentsDir(), promptForPath, print)
+    except RuntimeError as error:
+        return fail(f"{error}\nRun setup.exe by hand to finish the update.", delay=3)
     print("Documents directory found")
 
-    # The batch file hardcodes the documents path, so rewrite it when the user
-    # keeps their saves somewhere other than the default.
+    # The batch file hardcodes the documents path, so always write the one we
+    # just resolved. Rewriting it only for non-default paths meant a second
+    # install from the same extracted folder kept the first install's path, and
+    # left whatever the shipped file happened to guess in place otherwise.
     batchPath = source / BATCH_NAME
-    if documents != defaultDocuments:
-        print("Updating the runRPC.bat...\n")
-        try:
-            lines = batchPath.read_text(encoding=BATCH_ENCODING).splitlines(keepends=True)
-            batchPath.write_text(
-                "".join(rewriteBatchDocumentsPath(lines, str(documents))),
-                encoding=BATCH_ENCODING,
-            )
-        # ValueError covers both an empty runRPC.bat and an undecodable one.
-        except (OSError, ValueError) as error:
-            return fail(f"{error}\nCan't change the runRPC.bat")
+    print("Updating the runRPC.bat...\n")
+    try:
+        lines = batchPath.read_text(encoding=BATCH_ENCODING).splitlines(keepends=True)
+        batchPath.write_text(
+            "".join(rewriteBatchDocumentsPath(lines, str(documents))),
+            encoding=BATCH_ENCODING,
+        )
+    # ValueError covers both an empty runRPC.bat and an undecodable one.
+    except (OSError, ValueError) as error:
+        return fail(f"{error}\nCan't change the runRPC.bat")
 
     # Copy the payload next to the saves.
     installDir = documents / INSTALL_DIR_NAME
@@ -143,7 +163,10 @@ def main() -> int:
         return fail(f"{error}\nCan't change the {SETTINGS_FILE}", delay=3)
 
     # 3 - locate the game folder, recognised by hoi4.exe
-    gameFolder = findGameDir(defaultGameDir(), input, print)
+    try:
+        gameFolder = findGameDir(defaultGameDir(), promptForPath, print)
+    except RuntimeError as error:
+        return fail(f"{error}\nRun setup.exe by hand to finish the update.", delay=3)
     print("Game directory found")
 
     try:
@@ -166,15 +189,18 @@ def main() -> int:
         return fail(f"{error}\nCan't change the {LAUNCHER_SETTINGS}", delay=3)
 
     print("\n\nSuccess! The hoi4Presence is installed in your game folder.\n\n")
-    print("Execute the game via launcher to auto activate the presence.\n\nYou can delete this folder now.\n\n")
+    print("Execute the game via launcher to auto activate the presence.\n\n")
+    print("Keep uninstall.exe -- it is the only copy, and it is not installed anywhere else.\n\n")
     print("See https://github.com/ThiaudioTT/hoi4-presence for updates and more information.\n\n")
 
     customInput()
     time.sleep(5)
 
     if IS_UPDATE:
-        # The launcher target is the shim, not the batch file it runs.
-        os.startfile(gameFolder / SHIM_NAME)
+        # Start the presence itself. Starting the launcher shim would run
+        # runRPC.bat, which also starts hoi4.exe -- on top of the game the user
+        # is already playing.
+        os.startfile(installDir / PRESENCE_EXE)
 
     return 0
 

@@ -1,4 +1,4 @@
-set "documentsPath=C:\Users\%USERNAME%\Documents\Paradox Interactive\Hearts of Iron IV"
+set "documentsPath=%USERPROFILE%\Documents\Paradox Interactive\Hearts of Iron IV"
 @REM This is file for executing the game and the presence, delete if you have uninstalled and change launcher-settings.json
 
 echo "starting hoi4RPC..."

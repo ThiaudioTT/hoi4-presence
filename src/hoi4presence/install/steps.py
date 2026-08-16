@@ -8,13 +8,24 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 
+# The files the installer moves around, by name. These are load-bearing:
+# build.spec and runRPC.bat refer to the same strings. Rename the source script
+# if you must; never rename the exe. See AGENTS.md.
+#
+# `launcher.py` repeats BATCH_NAME rather than importing it: the shim is the
+# first link in the launch chain and is deliberately stdlib-only.
+BATCH_NAME = "runRPC.bat"
+SHIM_NAME = "runRPC.exe"
+PRESENCE_EXE = "hoi4Presence.exe"
+LAUNCHER_SETTINGS = "launcher-settings.json"
+
 # Files the release zip must contain for an install to be possible.
 REQUIRED_DIST_FILES = (
     "checkupdate.exe",
-    "hoi4Presence.exe",
+    PRESENCE_EXE,
     "version.json",
-    "runRPC.bat",
-    "runRPC.exe",
+    BATCH_NAME,
+    SHIM_NAME,
 )
 
 # The launcher's exePath/exeArgs before and after installation. The Paradox

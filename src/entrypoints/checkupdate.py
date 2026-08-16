@@ -69,7 +69,9 @@ def main() -> int:
 
     logger.info("Update found: %s", remote["version"])
 
-    downloadPath = downloadUpdate()
+    # The tag has to be exactly "v<version>" for the asset name to match what
+    # build.spec produces. See AGENTS.md.
+    downloadPath = downloadUpdate(f"v{remote['version']}")
     if downloadPath is None:
         return 0
 

@@ -30,7 +30,6 @@ is not obvious from the file layout.
 | `src/runRPC.bat` | Batch file the launcher shim runs. Ships in the release. |
 | `src/save games/` | Sample save for running from source. |
 | `assets/` | Mirror of the flag images uploaded to the Discord developer portal. Nothing reads it at runtime. |
-| `tools/` | One-shot dev scripts, not part of the build. |
 | `tests/` | The pytest suite. |
 | `build.spec` | PyInstaller spec plus the zip-packaging step. |
 | `version.json` | The version. Single source of truth. |
@@ -61,9 +60,9 @@ So, in anything under `src/hoi4presence/` except `runner.py` and
 
 **The PyInstaller build cannot be verified locally** unless you are on Windows.
 It only runs in CI. Any change to `build.spec`, to the entry-point script paths,
-or to the package import graph must be validated by pushing to the `test` branch
-(or running *Build and release (test)* via **Run workflow**) and checking the
-resulting `test` prerelease zip. `tests/test_packaging.py` catches the most
+or to the package import graph must be validated by pushing to the `dev` branch
+(or running *Build and release (testers)* via **Run workflow**) and checking the
+resulting `dev` prerelease zip. `tests/test_packaging.py` catches the most
 common breakage — `build.spec` pointing at a script that no longer exists — but
 it cannot prove the build links.
 
@@ -113,26 +112,39 @@ with the reason rather than deleting the test.
 
 1. Bump `version.json`.
 2. Move the `Unreleased` entries in `CHANGELOG.md` under the new version.
-3. Merge to `main` — that publishes a rolling `development` prerelease.
+3. Merge to `main` — that publishes a rolling `beta` prerelease.
 4. Tag a stable release **exactly** `v<version>`.
 
 ## Known follow-ups, deliberately not fixed
 
-- **Release asset name mismatch.** The updater looks for
-  `hoi4-presence-{tag_name}.zip` while the build produces
-  `hoi4-presence-v{version}.zip`. They agree only when the tag is exactly
-  `v<version>`, and both CI lanes publish to the rolling tags `development` and
-  `test`. A client whose `/releases/latest` resolves to a prerelease finds no
-  asset and does nothing. Fixing this is a release-policy decision.
+- **A stable release must still be tagged exactly `v<version>`.** The updater now
+  fetches `/releases/tags/v{version}` using the version it read from
+  `version.json` on `main`, so the rolling `beta` and `dev` prereleases
+  can no longer be mistaken for an update. But the asset name is still derived
+  from the tag, so a tag that is not exactly `v<version>` produces a release the
+  updater will never find. `tests/test_packaging.py` pins the convention.
 - **`runRPC.bat` could be folded into `launcher.py`.** The batch file is a
   removable layer, but it is still referenced by the installer, the uninstaller
   and `build.spec`, and removing it changes the installed runtime chain — which
   can only be validated on Windows.
-- **`build-release-python.yaml` uses `marvinpinto/action-automatic-releases`,**
-  which is archived, and lacks `permissions: contents: write`. The `test` lane
-  already uses the `gh` CLI instead; porting the `main` lane over touches
-  publishing and belongs in its own change.
 - **`BEG` (Benishangul-Gumuz Nation) has no flag.** It was showing Bangladesh's;
   the wiki is behind a bot challenge so the real image could not be confirmed and
   it falls back to the default logo. The likely URL is noted in a comment beside
   the entry.
+- **Most wiki-hosted flags are probably not rendering.** `countries.py` has 264
+  entries; 92 use a Discord developer-portal asset key and 172 use a URL. Of
+  those 172, **146 point at `hoi4.paradoxwikis.com`, and every one of them now
+  returns a 3 KB anti-bot challenge page instead of the PNG** — `content-type:
+  text/html`, HTTP 200, even with a browser `User-Agent`. Discord fetches these
+  server-side to proxy them, so those countries almost certainly show no flag.
+  Reproduce with:
+
+  ```sh
+  curl -sI https://hoi4.paradoxwikis.com/images/9/9e/Bangladesh.png | grep -i content-type
+  ```
+
+  The 25 `i.imgur.com` links and the portal asset keys still serve real images.
+  Fixing this means re-hosting ~146 flags — most cheaply by uploading them to
+  the Discord developer portal and switching those entries to asset keys, which
+  is what `test_countries_data.py` already expects for portal-hosted flags. It
+  is a data migration, not a code change, so it belongs in its own PR.

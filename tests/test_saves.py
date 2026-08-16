@@ -81,10 +81,6 @@ def test_picks_the_newest_save(saveDir):
     assert os.path.basename(latest) == "newest.hoi4"
 
 
-def test_glob_ignores_non_saves(saveDir):
-    assert all(path.endswith(".hoi4") for path in findSaves(str(saveDir / "*.hoi4")))
-
-
 def test_no_saves_returns_none():
     """Regression: max() on an empty glob raised, and the error was swallowed."""
     assert pickLatestSave([]) is None

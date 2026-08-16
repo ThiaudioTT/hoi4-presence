@@ -103,7 +103,7 @@ def test_similar_asset_names_are_not_matched(releaseAssets):
 
 def test_no_matching_asset_returns_none(releaseAssets):
     """Regression: a missing asset used to reach shutil.unpack_archive(None, ...)."""
-    assert pickReleaseAsset(releaseAssets, "development") is None
+    assert pickReleaseAsset(releaseAssets, "beta") is None
 
 
 def test_no_assets_at_all_returns_none():
