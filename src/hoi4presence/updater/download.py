@@ -5,10 +5,11 @@ from __future__ import annotations
 import logging
 import os
 import shutil
+from collections.abc import Callable
 
 import requests
 
-from hoi4presence.updater.release import assetName, formatProgress, pickReleaseAsset
+from hoi4presence.updater.release import assetName, pickReleaseAsset
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +23,18 @@ RELEASE_BY_TAG_URL = "https://api.github.com/repos/ThiaudioTT/hoi4-presence/rele
 CHUNK_SIZE = 1024**2
 
 
-def downloadUpdate(tagName: str, destination: str | None = None) -> str | None:
+def downloadUpdate(
+    tagName: str,
+    destination: str | None = None,
+    *,
+    onProgress: Callable[[int, int], None] | None = None,
+) -> str | None:
     """Download and unpack the release published as ``tagName``.
 
     Returns the directory it was unpacked into, or None when there is nothing to
-    install or the download failed.
+    install or the download failed. ``onProgress`` is called with the bytes so
+    far and the total from the Content-Length header, which servers may omit and
+    which then arrives as 0.
     """
     try:
         # Inside the try: a missing TEMP is a failed update, not a traceback.
@@ -60,7 +68,8 @@ def downloadUpdate(tagName: str, destination: str | None = None) -> str | None:
                 for chunk in response.iter_content(CHUNK_SIZE):
                     handle.write(chunk)
                     downloaded += len(chunk)
-                    logger.info("Downloading... %s", formatProgress(downloaded, total))
+                    if onProgress is not None:
+                        onProgress(downloaded, total)
 
         logger.info("Download complete.")
 

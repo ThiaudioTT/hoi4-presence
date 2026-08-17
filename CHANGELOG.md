@@ -13,6 +13,20 @@ summaries rather than a complete record.
 
 ### Added
 
+- A console UI for `setup.exe`, `uninstall.exe` and `checkupdate.exe`, built on
+  `rich`. Each stage of an install now gets a labelled progress bar that stays on
+  screen for at least 1.2 seconds, so the whole thing is watchable instead of a
+  wall of `print` output that scrolled past in well under a second. Errors get a
+  panel and wait for a keypress rather than a three-second `sleep`.
+
+  `checkupdate.exe` had a console window it never wrote anything to — every
+  message went to `checkupdate.log`, so a download in progress looked like a
+  blank box sitting on top of the game. It now shows a real byte-count bar, and
+  only when there is actually an update: the up-to-date path still writes nothing
+  and exits immediately, because it runs on every single launch.
+
+  After a successful install, `setup.exe` cycles block-art flags for the seven
+  majors for about three seconds.
 - A pytest suite covering the country table, save parsing, presence payloads,
   path discovery, the updater and the installer transforms.
 - A `Tests` workflow running ruff and pytest on Linux and Windows. Both build
@@ -69,6 +83,13 @@ summaries rather than a complete record.
 - The filenames shared by the installer, the uninstaller and the payload check
   (`runRPC.bat`, `runRPC.exe`, `hoi4Presence.exe`, `launcher-settings.json`) are
   defined once in `hoi4presence.install.steps`.
+- `checkupdate.exe` starts `setup.exe -update` after it has finished with the
+  console rather than before. `start_new_session` does not give the child its own
+  console on Windows, so the two would have been drawing over each other.
+- `setupLogging` takes `stream=False`. A `StreamHandler` binds `sys.stderr` when
+  it is constructed, so one created before a progress bar starts cannot be
+  intercepted by it, and its records land on the terminal raw.
+- `release.formatProgress` is gone; `rich` renders the download progress now.
 
 ### Fixed
 

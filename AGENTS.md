@@ -24,6 +24,7 @@ not obvious from the file layout.
 | `src/hoi4presence/runner.py` | The polling loop. **The only module importing `pypresence`/`psutil`.** |
 | `src/hoi4presence/paths.py` | Base-directory resolution and interactive folder discovery. |
 | `src/hoi4presence/logging_setup.py` | Rotating file log for the windowed executables. |
+| `src/hoi4presence/ui.py` | The console wizard (`rich`) the three console executables share, plus the post-install flag parade. |
 | `src/hoi4presence/updater/` | Version comparison (`version_check`), asset naming (`release`), download (`download`). |
 | `src/hoi4presence/install/steps.py` | Pure transforms for `settings.txt`, `launcher-settings.json`, payload validation. |
 | `src/entrypoints/` | Thin scripts PyInstaller builds. Each has a `main()` and a `__main__` guard. |
@@ -57,6 +58,15 @@ So, in anything under `src/hoi4presence/` except `runner.py` and
 - do not read `USERPROFILE`, `PROGRAMFILES(X86)` or `TEMP` at module scope — take
   the environment as an argument, the way `paths.defaultDocumentsDir` does;
 - do not assume backslash paths or a Windows filesystem in assertions.
+
+**`rich` is in both requirements files, and pinned to 13.x.** It is the one
+runtime dependency `requirements-dev.txt` also carries, because
+`hoi4presence.ui` is importable, tested code and pure Python — the exclusions
+above are about the Windows-only, compiled packages. The pin is not cosmetic:
+rich 14+ resolves its cell-width tables through a runtime `import_module()` that
+PyInstaller's static analysis cannot see, so a frozen exe raises
+`ModuleNotFoundError` on the first string it measures. 13.x uses a static table
+and needs no `hiddenimports`.
 
 **The PyInstaller build cannot be verified locally** unless you are on Windows.
 It only runs in CI. Any change to `build.spec`, to the entry-point script paths,
@@ -95,8 +105,12 @@ loop at module scope, which is the reason none of this was testable.
 - Function names are camelCase. This is not PEP 8, but it is what the codebase
   has always used, and consistency beats a mass rename.
 - The windowed executables log to `hoi4Presence.log` via `logging`; the console
-  wizards (`setup`, `uninstall`) use `print`, because their output *is* the user
-  interface and timestamps would only get in the way.
+  executables (`setup`, `uninstall`, `checkupdate`) drive
+  `hoi4presence.ui.Wizard`, because their output *is* the user interface and
+  timestamps would only get in the way. Do not add bare `print` or `input` back
+  to them — `Wizard.ask`/`warn` are what `paths.findDirContaining` expects, and
+  `checkupdate` passes `stream=False` to `setupLogging` so its records go to
+  `checkupdate.log` only.
 - Prefer adding logic to `src/hoi4presence/` with a test over adding it to an
   entry-point script.
 

@@ -15,6 +15,7 @@ import urllib.request
 
 from hoi4presence.logging_setup import setupLogging
 from hoi4presence.paths import getBaseDir
+from hoi4presence.ui import Wizard
 from hoi4presence.updater.download import downloadUpdate
 from hoi4presence.updater.version_check import (
     REMOTE_VERSION_URL,
@@ -44,7 +45,11 @@ def versionDir() -> Path:
 def main() -> int:
     # Its own file: the launcher shim starts this and hoi4Presence.exe together,
     # and a RotatingFileHandler shared between two processes breaks on rollover.
-    setupLogging(getBaseDir(__file__), fileName="checkupdate.log")
+    #
+    # stream=False because the console below belongs to the Wizard. A
+    # StreamHandler made here binds sys.stderr for good, so its records would
+    # print straight over the progress bar rather than through it.
+    setupLogging(getBaseDir(__file__), fileName="checkupdate.log", stream=False)
     logger.info("Checking for updates in hoi4 presence...")
 
     try:
@@ -69,17 +74,43 @@ def main() -> int:
 
     logger.info("Update found: %s", remote["version"])
 
-    # The tag has to be exactly "v<version>" for the asset name to match what
-    # build.spec produces. See AGENTS.md.
-    downloadPath = downloadUpdate(f"v{remote['version']}")
-    if downloadPath is None:
-        return 0
+    # Only now is there anything worth showing. Up to here this runs on every
+    # single launch and must stay quiet and fast, because the game is starting
+    # behind it.
+    #
+    # interactive=False: there is a console, but the shim started it alongside
+    # the game and nobody is sitting at it.
+    with Wizard(
+        "hoi4-presence update",
+        f"Updating {local['version']} to {remote['version']}.",
+        totalSteps=1,
+        interactive=False,
+    ) as wizard:
+        # The tag has to be exactly "v<version>" for the asset name to match what
+        # build.spec produces. See AGENTS.md.
+        try:
+            with wizard.step(f"Downloading hoi4-presence v{remote['version']}") as onProgress:
+                downloadPath = downloadUpdate(f"v{remote['version']}", onProgress=onProgress)
+                # Raised rather than checked after the step, so the step is marked
+                # failed instead of reporting a tick above a failure panel.
+                # downloadUpdate has already logged why.
+                if downloadPath is None:
+                    raise RuntimeError("Could not download the update.")
+        except RuntimeError as error:
+            wizard.fail(f"{error}\n\nStarting the current version instead.")
+            return 0
+
+        wizard.finish(f"Downloaded. Handing over to {INSTALLER_NAME}.")
 
     installer = Path(downloadPath) / INSTALLER_NAME
     logger.info("Updating...")
 
     # Hand over to setup.exe, which reinstalls and restarts the presence. Passing
     # cwd so the installer knows where the freshly unpacked files are.
+    #
+    # Outside the wizard on purpose: start_new_session does not give the child a
+    # new console on Windows, so setup.exe draws on this one. Ours has to be
+    # finished with it -- live region erased, cursor restored -- before it starts.
     subprocess.Popen([str(installer), "-update"], start_new_session=True, cwd=downloadPath)
 
     logger.info("Closing checkupdate...")

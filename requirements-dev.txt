@@ -9,3 +9,8 @@ ruff==0.6.9
 
 # Pure Python, used by hoi4presence.updater.version_check.
 semantic-version==2.10.0
+
+# Pure Python, used by hoi4presence.ui. Pinned to 13.x on purpose: rich 14+
+# resolves its cell-width tables with a runtime import_module() that PyInstaller
+# cannot see, so a frozen exe dies on the first string it measures.
+rich==13.9.4

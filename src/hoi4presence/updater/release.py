@@ -27,14 +27,3 @@ def pickReleaseAsset(assets: list[dict], tagName: str) -> str | None:
         if asset.get("name") == wanted:
             return asset.get("browser_download_url")
     return None
-
-
-def formatProgress(downloaded: int, total: int) -> str:
-    """Human-readable download progress.
-
-    ``total`` comes from a Content-Length header that servers may omit, so the
-    unknown case is reported rather than raising ZeroDivisionError.
-    """
-    if total <= 0:
-        return "?%"
-    return f"{downloaded / total * 100:.0f}%"
