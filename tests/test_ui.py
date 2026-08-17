@@ -17,7 +17,15 @@ from rich.console import Console
 
 from hoi4presence.countries import countries
 from hoi4presence.paths import findDocumentsDir
-from hoi4presence.ui import FLAG_PALETTE, FLAGS, MIN_STEP_SECONDS, Wizard, renderFlag
+from hoi4presence.ui import (
+    DONE_LABEL,
+    FAILED_LABEL,
+    FLAG_PALETTE,
+    FLAGS,
+    MIN_STEP_SECONDS,
+    Wizard,
+    renderFlag,
+)
 
 
 @pytest.fixture
@@ -82,6 +90,7 @@ def test_each_step_leaves_a_line_behind_in_order(wizardFor):
     text = output.getvalue()
     assert text.index("first") < text.index("second") < text.index("third")
     assert text.count(wizard.tick) == 3
+    assert text.count(DONE_LABEL) == 3
     assert wizard.stepNumber == 3
 
 
@@ -93,7 +102,10 @@ def test_a_failing_step_marks_itself_and_re_raises(wizardFor):
         with wizard.step("copying the payload"):
             raise ValueError("disk full")
 
-    assert "copying the payload" in output.getvalue()
+    text = output.getvalue()
+    assert "copying the payload" in text
+    assert FAILED_LABEL in text
+    assert DONE_LABEL not in text
 
 
 def test_pacing_is_off_for_an_auto_update(wizardFor):
@@ -140,24 +152,59 @@ def test_the_display_is_stopped_even_when_a_step_escapes(wizardFor):
     assert wizard._progress.live.is_started is False
 
 
-def test_the_flag_parade_costs_an_auto_update_nothing(wizardFor):
-    wizard, output = wizardFor(interactive=False)
+def test_the_success_screen_costs_an_auto_update_nothing(wizardFor):
+    """No flags, and above all no waiting: nobody is there to press Enter."""
+    wizard, _ = wizardFor(interactive=False)
 
     started = time.monotonic()
     with wizard:
-        wizard.flagParade(seconds=5)
+        wizard.finish("done", flags=True)
 
     assert time.monotonic() - started < 0.5
+    assert wizard.reader.calls == []
 
 
-def test_the_flag_parade_stops_the_progress_bar_first(wizardFor):
-    """rich allows one live display at a time, so the bar has to go first."""
-    wizard, _ = wizardFor()
+def test_the_success_flags_loop_until_enter(wizardFor):
+    """rich cannot animate and block on input(), so the read is on its own thread.
+
+    The canned reader returns immediately, which is what ends the loop here --
+    the assertion that matters is that it ends at all rather than cycling
+    forever, and that the flags stopped the progress bar first.
+    """
+    wizard, output = wizardFor([""])
+
+    started = time.monotonic()
+    with wizard:
+        wizard.finish("done", flags=True)
+
+    assert time.monotonic() - started < 2
+    assert wizard._progress.live.is_started is False
+    assert wizard.reader.calls == [""]
+
+
+def test_confirm_defaults_to_yes_on_enter(wizardFor):
+    wizard, _ = wizardFor([""])
 
     with wizard:
-        wizard.flagParade(seconds=0.07)
+        assert wizard.confirm("go ahead?") is True
 
-        assert wizard._progress.live.is_started is False
+
+@pytest.mark.parametrize("answer", ["n", "N", "no", " No "])
+def test_confirm_takes_no_for_an_answer(wizardFor, answer):
+    wizard, _ = wizardFor([answer])
+
+    with wizard:
+        assert wizard.confirm("go ahead?") is False
+
+
+def test_confirm_does_not_stop_an_auto_update(wizardFor):
+    """setup.exe -update has nobody to ask, and must not wait for one."""
+    wizard, _ = wizardFor(interactive=False)
+
+    with wizard:
+        assert wizard.confirm("go ahead?") is True
+
+    assert wizard.reader.calls == []
 
 
 @pytest.mark.parametrize("tag", sorted(FLAGS))

@@ -12,9 +12,11 @@ The two windowed executables must never import this module: they are built
 
 from __future__ import annotations
 
+import threading
 import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
+from itertools import cycle
 
 from rich.console import Console, Group
 from rich.live import Live
@@ -31,9 +33,15 @@ MIN_STEP_SECONDS = 1.2
 # Sleeps used to fill a paced bar. 24 over 1.2s is ~20fps, which reads as smooth.
 PACE_FRAMES = 24
 
-FLAG_PARADE_SECONDS = 3.0
+# How long each flag holds before the next one slides in, while the success
+# screen waits for the user.
+FLAG_SECONDS_EACH = 0.45
 # One character per cell, expanded FLAG_CELL_WIDTH columns wide.
 FLAG_CELL_WIDTH = 3
+
+# Right-hand column on a finished step's permanent line.
+DONE_LABEL = "DONE"
+FAILED_LABEL = "FAILED"
 
 # A grid rather than horizontal bands, so vertical tricolours and the Japanese
 # sun come out of the same renderer.
@@ -182,12 +190,12 @@ class Wizard:
         try:
             yield onProgress
         except Exception:
-            self._finishRow(taskId, f"  [red]{self.cross}[/red] {label}")
+            self._finishRow(taskId, self.cross, label, FAILED_LABEL, "red")
             raise
         else:
             if not determinate:
                 self._pace(taskId, time.monotonic() - started)
-            self._finishRow(taskId, f"  [green]{self.tick}[/green] {label}")
+            self._finishRow(taskId, self.tick, label, DONE_LABEL, "green")
             if self._overall is not None:
                 self._progress.update(
                     self._overall,
@@ -218,29 +226,66 @@ class Wizard:
         finally:
             self._progress.start()
 
-    def flagParade(self, seconds: float = FLAG_PARADE_SECONDS) -> None:
-        """Cycle the majors' flags, as a full stop after a successful install."""
+    def confirm(self, question: str) -> bool:
+        """Ask before touching anything. An auto-update has nobody to ask, and proceeds.
+
+        Enter means yes: this replaces the "press enter to continue" the console
+        wizards opened with, and refusing is the unusual answer.
+        """
         if not self.interactive:
-            return
-        # rich allows only one live display at a time, so the progress bar has to
-        # go first. Nothing restarts it: every step is finished by now.
+            return True
         self._progress.stop()
+        try:
+            answer = self.reader(f"  {question} [Y/n] ")
+        finally:
+            self._progress.start()
+        return answer.strip().lower() in ("", "y", "yes")
 
-        pause = seconds / len(FLAGS)
-        with Live(console=self.console, transient=True) as live:
-            for tag in FLAGS:
-                # refresh=True, or Live's 4Hz background thread decides which
-                # frames it got round to: a flag held for less than 250ms is
-                # replaced before it is ever drawn.
-                live.update(Group(Text(), renderFlag(tag)), refresh=True)
-                time.sleep(pause)
+    def finish(self, *lines: str, flags: bool = False) -> None:
+        """Show the closing panel, and hold the window open for the user.
 
-    def finish(self, *lines: str) -> None:
-        """Show the closing panel, and hold the window open for the user."""
+        ``flags`` cycles the majors underneath it until the user presses Enter.
+        """
         self._progress.stop()
         self.console.print(Panel(Group(*[Text(line) for line in lines]), title=self.title, padding=(1, 2)))
-        if self.interactive:
+        if not self.interactive:
+            return
+        if flags:
+            self._holdWithFlags()
+        else:
             self.reader("  Press Enter to close...")
+
+    def _holdWithFlags(self) -> None:
+        """Loop the majors' flags until Enter comes in.
+
+        The read happens on its own thread because rich cannot animate and block
+        on ``input()`` at the same time; the animation then waits on the same
+        event it is watching, so Enter ends it immediately rather than after the
+        current flag times out.
+        """
+        pressed = threading.Event()
+
+        def waitForEnter() -> None:
+            try:
+                self.reader("")
+            except EOFError:
+                # No stdin at all -- do not spin forever on the animation.
+                pass
+            finally:
+                pressed.set()
+
+        # daemon: the process must still be able to exit if nothing is ever typed.
+        threading.Thread(target=waitForEnter, daemon=True).start()
+
+        prompt = Text("\n  Press Enter to close...", style="dim")
+        with Live(console=self.console, transient=True) as live:
+            for tag in cycle(FLAGS):
+                if pressed.is_set():
+                    break
+                # refresh=True, or Live's 4Hz background thread decides which
+                # frames it got round to and some flags are never drawn.
+                live.update(Group(Text(), renderFlag(tag), prompt), refresh=True)
+                pressed.wait(FLAG_SECONDS_EACH)
 
     def fail(self, message: str) -> int:
         """Report a failure and return the exit code, so `return wizard.fail(...)` reads."""
@@ -250,12 +295,22 @@ class Wizard:
             self.reader("  Press Enter to close...")
         return 1
 
-    def _finishRow(self, taskId: TaskID, line: str) -> None:
+    def _finishRow(self, taskId: TaskID, glyph: str, label: str, outcome: str, style: str) -> None:
         self._progress.remove_task(taskId)
         # remove_task is the one Progress mutator that does not refresh, and
         # console.print runs the live render hook -- so without this the row we
         # just deleted gets redrawn *below* the permanent line.
         self._progress.refresh()
+
+        line = Text("  ")
+        line.append(glyph, style=style)
+        line.append(f" {label} ")
+        # A dotted leader out to a right-aligned outcome, so the finished steps
+        # read as one column rather than ragged sentences.
+        room = self.console.width - line.cell_len - len(outcome) - 1
+        if room > 0:
+            line.append("." * room, style="dim")
+        line.append(f" {outcome}", style=f"bold {style}")
         self.console.print(line)
 
     def _pace(self, taskId: TaskID, elapsed: float) -> None:

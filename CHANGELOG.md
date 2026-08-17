@@ -25,8 +25,12 @@ summaries rather than a complete record.
   only when there is actually an update: the up-to-date path still writes nothing
   and exits immediately, because it runs on every single launch.
 
-  After a successful install, `setup.exe` cycles block-art flags for the seven
-  majors for about three seconds.
+  `setup.exe` and `uninstall.exe` now ask for confirmation before touching
+  anything, and declining exits without changing a thing. Each finished stage
+  leaves a `DONE` in the right-hand column, and `setup.exe`'s success screen
+  cycles block-art flags for the seven majors until you press Enter. None of
+  this applies to an auto-update, which has nobody at the console: it neither
+  asks, nor animates, nor waits.
 - A pytest suite covering the country table, save parsing, presence payloads,
   path discovery, the updater and the installer transforms.
 - A `Tests` workflow running ruff and pytest on Linux and Windows. Both build

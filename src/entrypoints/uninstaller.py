@@ -38,6 +38,10 @@ def main() -> int:
         "Removes the Discord Rich Presence from your Hearts of Iron IV install.",
         totalSteps=TOTAL_STEPS,
     ) as wizard:
+        if not wizard.confirm("Remove hoi4-presence from your Hearts of Iron IV folder?"):
+            wizard.finish("Cancelled. Nothing on your system was changed.")
+            return 0
+
         with wizard.step("Locating the HOI4 documents folder"):
             documents = findDocumentsDir(defaultDocumentsDir(), wizard.ask, wizard.warn)
 

@@ -82,6 +82,10 @@ def main() -> int:
         totalSteps=BASE_STEPS + 1 if isUpdate else BASE_STEPS,
         interactive=not isUpdate,
     ) as wizard:
+        if not wizard.confirm("Install hoi4-presence into your Hearts of Iron IV folder?"):
+            wizard.finish("Cancelled. Nothing on your system was changed.")
+            return 0
+
         # Next to setup.exe, not in the working directory: "Run as administrator"
         # launches with cwd set to System32, and the auto-updater launches setup.exe
         # from the folder it unpacked into.
@@ -166,14 +170,13 @@ def main() -> int:
         except (OSError, ValueError) as error:
             return wizard.fail(f"{error}\n\nCan't change the {LAUNCHER_SETTINGS}")
 
-        wizard.flagParade()
         wizard.finish(
             "Success! The hoi4Presence is installed in your game folder.",
             "",
             "Start the game through the Paradox launcher to activate the presence.",
-            "Keep uninstall.exe -- it is the only copy, and it is not installed anywhere else.",
             "",
             "See https://github.com/ThiaudioTT/hoi4-presence for updates and more information.",
+            flags=True,
         )
 
     if isUpdate:

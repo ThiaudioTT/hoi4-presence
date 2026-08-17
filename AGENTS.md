@@ -24,7 +24,7 @@ not obvious from the file layout.
 | `src/hoi4presence/runner.py` | The polling loop. **The only module importing `pypresence`/`psutil`.** |
 | `src/hoi4presence/paths.py` | Base-directory resolution and interactive folder discovery. |
 | `src/hoi4presence/logging_setup.py` | Rotating file log for the windowed executables. |
-| `src/hoi4presence/ui.py` | The console wizard (`rich`) the three console executables share, plus the post-install flag parade. |
+| `src/hoi4presence/ui.py` | The console wizard (`rich`) the three console executables share, plus the flag animation on setup's success screen. |
 | `src/hoi4presence/updater/` | Version comparison (`version_check`), asset naming (`release`), download (`download`). |
 | `src/hoi4presence/install/steps.py` | Pure transforms for `settings.txt`, `launcher-settings.json`, payload validation. |
 | `src/entrypoints/` | Thin scripts PyInstaller builds. Each has a `main()` and a `__main__` guard. |
