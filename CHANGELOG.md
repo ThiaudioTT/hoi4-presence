@@ -23,6 +23,20 @@ summaries rather than a complete record.
   exception went nowhere.
 - `AGENTS.md`, `docs/architecture.md` and this changelog.
 
+### Removed
+
+- `runRPC.bat`. `runRPC.exe` now starts the game, the updater and the presence
+  itself instead of shelling out to a batch file that did nothing but three
+  `start` calls and carry the documents path. That path moved to `runRPC.cfg`,
+  a one-line UTF-8 file the installer writes into the game folder.
+
+  This takes `cmd.exe` out of the launch chain, and with it three sharp edges:
+  `shell=True`, the console-codepage read/write that corrupted any non-ASCII
+  documents path, and a `.bat` stored with LF endings and no `.gitattributes`.
+  The shim now starts the game *before* reading the config, so a broken install
+  costs the presence rather than the Play button. `setup.exe` and
+  `uninstall.exe` delete any `runRPC.bat` left over from a 1.3.x install.
+
 ### Changed
 
 - The release lanes were renamed. `main` now publishes a `beta` prerelease
