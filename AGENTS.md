@@ -29,8 +29,9 @@ not obvious from the file layout.
 | `src/hoi4presence/install/steps.py` | Pure transforms for `settings.txt`, `launcher-settings.json`, payload validation. |
 | `src/entrypoints/` | Thin scripts PyInstaller builds. Each has a `main()` and a `__main__` guard. |
 | `src/entrypoints/launcher.py` | The shim the Paradox launcher spawns. Stdlib-only, on purpose. |
-| `src/save games/` | Sample save for running from source. |
-| `assets/` | Mirror of the flag images uploaded to the Discord developer portal. Nothing reads it at runtime. |
+| `src/save games/` | Sample saves for running from source, trimmed to the header. |
+| `assets/` | Mirror of the images uploaded to the Discord developer portal. Nothing reads it at runtime. |
+| `assets/ideologies/` | The ideology/ironman badges. The file stem **is** the portal asset key. |
 | `tests/` | The pytest suite. |
 | `build.spec` | PyInstaller spec plus the zip-packaging step. |
 | `version.json` | The version. Single source of truth. |
@@ -128,6 +129,20 @@ sharing a flag or a name (bar an explicit allowlist), asset keys equal to the
 lowercased tag, and every mirrored PNG being referenced. If a new entry
 legitimately reuses another country's flag, add it to `ALLOWED_SHARED_FLAGS`
 with the reason rather than deleting the test.
+
+## Display names come from the game, not from the save
+
+`difficulty="very_hard"` is **Elite** in game, and `ideology=neutrality` is
+**Non-Aligned**. `presence.py` owns both tables, and everything user-facing goes
+through `displayName`, which falls back to title-casing an unknown value rather
+than printing raw snake_case. The tables were derived from real saves, and
+`tests/test_presence.py` re-derives them from the samples in `src/save games/`,
+whose filenames record which difficulty each campaign was started on — change a
+mapping and that test fails.
+
+The ideology keys are also portal asset keys (`assets/ideologies/`), so renaming
+one silently removes its badge. An ideology with no entry falls back to the
+game's `unknown-ideology` icon rather than to nothing.
 
 ## How to release
 

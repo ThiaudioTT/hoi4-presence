@@ -18,7 +18,14 @@ player="GER"
 ideology=fascism
 date="1936.1.1.12"
 difficulty="normal"
+version="Operation Postern v1.19.2.0.a729 (d245)"
+ironman="Ironman Finland 1.hoi4"
 ```
+
+`ironman` appears only in ironman saves — its presence *is* the flag — and
+`version` is missing from old enough saves, so neither is required to parse.
+`difficulty` holds HOI4's internal name (`very_hard`), not the one the game's own
+menu shows (`Elite`); `presence.py` owns that translation.
 
 ## Runtime chain
 
@@ -57,7 +64,7 @@ corrupt `runRPC.cfg` has to cost the presence, never the Play button.
 3. skip it unless it was modified in the last **120 seconds**, so a save left
    over from a previous session is not reported as current;
 4. read the first **20 lines**, then close the handle immediately — HOI4 needs
-   write access to the file it is autosaving into. Only five of those lines are
+   write access to the file it is autosaving into. Only seven of those lines are
    used; the wider window keeps a HOI4 patch that inserts a header field from
    pushing `difficulty` out of range;
 5. parse those lines into a `SaveHeader`, map the tag to a `Country`, and push
@@ -101,6 +108,14 @@ and the image comes in two flavours:
   `tests/test_countries_data.py` keeps the two sides in sync.
 - **a full URL**, mostly to the HOI4 wiki, for releasable countries that the
   portal does not host.
+
+The flag is the presence's *large* image. The small badge on its corner is the
+ideology — `fascism`, `democratic`, `communism`, `neutrality` and the mod-only
+`anarchism`, each name doubling as its portal asset key — replaced by `ironman`
+on an ironman run, since that is the rarer fact and the ideology is still named
+in the hover text. All of them are mirrored under `assets/ideologies/`, and an
+ideology with no badge of its own gets the game's `unknown-ideology` icon, so one
+added by a patch or a mod cannot break the payload.
 
 ## Updating
 

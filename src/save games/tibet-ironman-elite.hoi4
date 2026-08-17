@@ -1,0 +1,15 @@
+HOI4txt
+player="TIB"
+ideology=neutrality
+date="1936.1.15.17"
+difficulty="very_hard"
+version="Operation Postern v1.19.2.0.a729 (d245)"
+ironman="tibet-ironman-elite"
+tutorial=no
+player_countries={
+	TIB={
+		user="Aaawhn zé da manga"
+		country_leader=yes
+		id=1
+	}
+}

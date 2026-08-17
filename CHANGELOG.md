@@ -39,6 +39,19 @@ summaries rather than a complete record.
   the updater writes `checkupdate.log` beside it. They are built without a
   console window, so until now every error message and every swallowed
   exception went nowhere.
+- The presence now reads the patch and the ironman flag out of the save header —
+  both were already inside the twenty lines it reads, just ignored. An ironman
+  run says so on the second line and gets a padlock badge in place of its
+  ideology; the patch name shows in the flag's hover text.
+- Ideology badges, using the game's own icons. The small image on the flag's
+  corner used to be the app logo on every single run; it is now the ideology
+  (`fascism`, `democratic`, `communism`, `neutrality`, plus the mod-only
+  `anarchism`) or the ironman gauntlet on an ironman run, mirrored under
+  `assets/ideologies/`. An ideology with no badge of its own gets the game's
+  `unknown-ideology` icon, so one added by a patch or a mod cannot break the
+  payload.
+- Six more sample saves under `src/save games/`, trimmed to their header — one
+  per difficulty plus an ironman run, covering every ideology between them.
 - `AGENTS.md`, `docs/architecture.md` and this changelog.
 
 ### Removed
@@ -57,6 +70,10 @@ summaries rather than a complete record.
 
 ### Changed
 
+- The presence reads like a presence rather than a debug dump. *"Playing as
+  German Reich"* over *"Year: 1936"* is now **German Reich — Fascist** over
+  **1 Jan 1936 · Elite · Ironman** — the full in-game date instead of just the
+  year, with the difficulty beside it.
 - The release lanes were renamed. `main` now publishes a `beta` prerelease
   titled "Beta release" instead of the `development` one, and the `test` lane
   moved to the `dev` branch as a `dev` prerelease titled "Testers build". Both
@@ -96,6 +113,15 @@ summaries rather than a complete record.
 - `release.formatProgress` is gone; `rich` renders the download progress now.
 
 ### Fixed
+
+- The presence showed HOI4's internal difficulty names instead of the ones the
+  game does — *"In very_hard mode"* rather than **Elite**. The save stores
+  `very_easy`, `easy`, `normal`, `hard` and `very_hard`; the menu the player
+  picked from says Civilian, Recruit, Regular, Veteran and Elite. Ideology had
+  the same problem, most visibly `neutrality`, which the game calls
+  **Non-Aligned**. An unrecognised value is now title-cased rather than shown
+  raw, so a difficulty added by a patch reads as *Some New Mode*, not
+  `some_new_mode`.
 
 - Both build workflows could fail to replace their rolling prerelease. The step
   was `gh release delete <tag> --yes --cleanup-tag || echo "no existing release"`,

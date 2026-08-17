@@ -7,6 +7,8 @@ A plaintext save starts with a fixed block of ``key=value`` lines::
     ideology=fascism
     date="1936.1.1.12"
     difficulty="normal"
+    version="Operation Postern v1.19.2.0.a729 (d245)"
+    ironman="Ironman Finland 1.hoi4"
 
 Only those first few lines are ever read, and the handle is closed immediately:
 HOI4 needs write access to the file it is autosaving into.
@@ -16,6 +18,7 @@ from __future__ import annotations
 
 import glob
 import os
+import re
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
@@ -30,6 +33,12 @@ FRESHNESS_WINDOW_SECONDS = 120
 
 REQUIRED_FIELDS = ("player", "ideology", "date", "difficulty")
 
+MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+# "Operation Postern v1.19.2.0.a729 (d245)" -> the patch name and its first three
+# components. The build hash and the fourth number are noise on a presence.
+VERSION_PATTERN = re.compile(r"(.+?) v(\d+\.\d+\.\d+)")
+
 
 class SaveParseError(ValueError):
     """Raised when a save header is truncated or missing fields we need."""
@@ -37,17 +46,42 @@ class SaveParseError(ValueError):
 
 @dataclass(frozen=True)
 class SaveHeader:
-    """The four fields the presence displays."""
+    """The save fields the presence displays.
+
+    ``version`` and ``ironman`` are optional rather than required: only ironman
+    saves carry an ``ironman`` key at all, and a save from an old enough patch
+    may predate ``version``. Neither is worth failing a parse over.
+    """
 
     tag: str
     ideology: str
     date: str
     difficulty: str
+    version: str = ""
+    ironman: bool = False
 
     @property
     def year(self) -> str:
         """The in-game year, e.g. ``"1936"`` from ``"1936.1.1.12"``."""
         return self.date[:4]
+
+    @property
+    def dateLabel(self) -> str:
+        """The in-game date, e.g. ``"1 Mar 1936"`` from ``"1936.3.1.2"``."""
+        parts = self.date.split(".")
+        if len(parts) < 3 or not all(part.isdigit() for part in parts[:3]):
+            return self.date
+
+        year, month, day = parts[:3]
+        if not 1 <= int(month) <= 12:
+            return self.date
+        return f"{int(day)} {MONTHS[int(month) - 1]} {year}"
+
+    @property
+    def versionLabel(self) -> str:
+        """The patch, e.g. ``"Operation Postern 1.19.2"``, or the raw string."""
+        match = VERSION_PATTERN.match(self.version)
+        return f"{match[1]} {match[2]}" if match else self.version
 
 
 def findSaves(pattern: str) -> list[str]:
@@ -109,4 +143,7 @@ def parseSaveHeader(text: str) -> SaveHeader:
         ideology=fields["ideology"],
         date=fields["date"],
         difficulty=fields["difficulty"],
+        version=fields.get("version", ""),
+        # The key exists only in ironman saves; its value is the save's own name.
+        ironman="ironman" in fields,
     )

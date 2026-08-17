@@ -112,7 +112,7 @@ def test_discord_being_down_at_launch_is_retried_rather_than_fatal(runner, monke
 
     assert len(FakePresence.instances) == 2
     assert FakePresence.instances[1].connected
-    assert any(update["details"] == "Playing as German Reich" for update in FakePresence.instances[1].updates)
+    assert any(update["details"] == "German Reich — Fascist" for update in FakePresence.instances[1].updates)
 
 
 def test_a_dead_pipe_is_dropped_so_the_next_cycle_reconnects(runner, monkeypatch):
