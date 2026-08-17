@@ -23,11 +23,60 @@ SAMPLE_HEADER = 'HOI4txt\nplayer="GER"\nideology=fascism\ndate="1936.1.1.12"\ndi
 def test_parses_the_sample_save(saveFile):
     header = parseSaveHeader(readSaveHeader(saveFile))
 
-    assert header == SaveHeader(tag="GER", ideology="fascism", date="1936.1.1.12", difficulty="normal")
+    assert header == SaveHeader(
+        tag="GER",
+        ideology="fascism",
+        date="1936.1.1.12",
+        difficulty="normal",
+        version="Avalanche v1.12.13.fbdd (b721)",
+    )
 
 
 def test_year_is_the_leading_date_component():
     assert parseSaveHeader(SAMPLE_HEADER).year == "1936"
+
+
+@pytest.mark.parametrize(
+    ("date", "expected"),
+    [
+        ("1936.1.1.12", "1 Jan 1936"),
+        ("1936.3.1.2", "1 Mar 1936"),
+        ("1939.9.1.12", "1 Sep 1939"),
+        ("1936.12.31.23", "31 Dec 1936"),
+        # Anything that is not year.month.day is shown as-is rather than guessed at.
+        ("1936", "1936"),
+        ("1936.13.1.12", "1936.13.1.12"),
+        ("nonsense", "nonsense"),
+    ],
+)
+def test_date_label(date, expected):
+    assert SaveHeader("GER", "fascism", date, "normal").dateLabel == expected
+
+
+@pytest.mark.parametrize(
+    ("version", "expected"),
+    [
+        ("Operation Postern v1.19.2.0.a729 (d245)", "Operation Postern 1.19.2"),
+        ("Avalanche v1.12.13.fbdd (b721)", "Avalanche 1.12.13"),
+        # A save old enough to have no version field, and one shaped differently.
+        ("", ""),
+        ("Some Patch", "Some Patch"),
+    ],
+)
+def test_version_label(version, expected):
+    assert SaveHeader("GER", "fascism", "1936.1.1.12", "normal", version).versionLabel == expected
+
+
+def test_ironman_is_true_only_when_the_key_is_present():
+    ironman = SAMPLE_HEADER + 'ironman="Ironman Finland 1.hoi4"\n'
+
+    assert parseSaveHeader(ironman).ironman is True
+    assert parseSaveHeader(SAMPLE_HEADER).ironman is False
+
+
+def test_a_save_without_a_version_still_parses():
+    """version= is not required: it is display sugar, not something to fail on."""
+    assert parseSaveHeader(SAMPLE_HEADER).version == ""
 
 
 def test_quotes_and_keys_are_stripped():

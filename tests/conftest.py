@@ -108,8 +108,13 @@ def countriesSource() -> list[tuple[str, str, str]]:
 
 @pytest.fixture(scope="session")
 def assetKeys() -> set[str]:
-    """Lowercased stems of every flag PNG mirrored under assets/."""
-    return {path.stem.lower() for path in (REPO_ROOT / "assets").rglob("*.png")}
+    """Lowercased stems of every flag PNG mirrored under assets/initialCountries/.
+
+    Scoped to that folder rather than all of assets/: the ideology and ironman
+    badges beside it are keyed off `ideology=`, not off a country tag, so the
+    country table cannot account for them and would report them as orphans.
+    """
+    return {path.stem.lower() for path in (REPO_ROOT / "assets" / "initialCountries").rglob("*.png")}
 
 
 @pytest.fixture(scope="session")
