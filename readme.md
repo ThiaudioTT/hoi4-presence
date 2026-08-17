@@ -37,7 +37,7 @@ Briefly: download the latest release, unzip it, and run `setup.exe`. The install
 - copies the presence into `Documents\Paradox Interactive\Hearts of Iron IV\hoi4Presence`,
 - sets `save_as_binary=no` in the game's `settings.txt`, because the presence reads your
   autosaves and can only do that when they are plaintext,
-- drops `runRPC.exe` and `runRPC.bat` into your game folder, and
+- drops `runRPC.exe` and `runRPC.cfg` into your game folder, and
 - points the Paradox launcher at `runRPC.exe`, which starts the game and the presence together.
 
 Run `uninstall.exe` to reverse all of that.

@@ -13,8 +13,9 @@ import shutil
 import time
 
 from hoi4presence.install.steps import (
-    BATCH_NAME,
+    CONFIG_NAME,
     LAUNCHER_SETTINGS,
+    LEGACY_BATCH_NAME,
     SHIM_NAME,
     setBinarySaves,
     setLauncherExe,
@@ -69,10 +70,12 @@ def main() -> int:
     try:
         print("Deleting rich presence")
         # ignore_errors so a second run, or one after the folder was deleted by
-        # hand, still clears the two files left in the game folder below.
+        # hand, still clears the files left in the game folder below.
         shutil.rmtree(documents / INSTALL_DIR_NAME, ignore_errors=True)
-        (gameFolder / BATCH_NAME).unlink(missing_ok=True)
         (gameFolder / SHIM_NAME).unlink(missing_ok=True)
+        (gameFolder / CONFIG_NAME).unlink(missing_ok=True)
+        # Left behind by a 1.3.x install this one was upgraded from.
+        (gameFolder / LEGACY_BATCH_NAME).unlink(missing_ok=True)
     except OSError as error:
         return fail(f"{error}\nCould not delete rich presence")
 

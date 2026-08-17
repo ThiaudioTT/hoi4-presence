@@ -4,8 +4,8 @@
 Run from the repository root with `pyinstaller build.spec`. This only works on
 Windows and is exercised in CI by the workflows in .github/workflows/.
 
-The exe names below are load-bearing -- runRPC.bat, the installer and the updater
-all refer to them as strings. Rename the source script, never the exe.
+The exe names below are load-bearing -- the launcher shim, the installer and the
+updater all refer to them as strings. Rename the source script, never the exe.
 """
 
 import json
@@ -85,7 +85,6 @@ os.makedirs(PAYLOAD, exist_ok=True)
 
 # Files that ship alongside the executables, copied straight into the payload.
 EXTRA_FILES = [
-    (os.path.join(SRC_PATH, "runRPC.bat"), "runRPC.bat"),
     (os.path.join(SPECPATH, "version.json"), "version.json"),
 ]
 

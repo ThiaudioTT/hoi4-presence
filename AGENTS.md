@@ -10,8 +10,8 @@ save header, and pushes that to Discord via `pypresence`. It ships as five
 PyInstaller executables.
 
 Read [docs/architecture.md](docs/architecture.md) before changing behaviour — the
-runtime chain (Paradox launcher → `runRPC.exe` → `runRPC.bat` → game + presence)
-is not obvious from the file layout.
+runtime chain (Paradox launcher → `runRPC.exe` → game + updater + presence) is
+not obvious from the file layout.
 
 ## Repository map
 
@@ -27,7 +27,7 @@ is not obvious from the file layout.
 | `src/hoi4presence/updater/` | Version comparison (`version_check`), asset naming (`release`), download (`download`). |
 | `src/hoi4presence/install/steps.py` | Pure transforms for `settings.txt`, `launcher-settings.json`, payload validation. |
 | `src/entrypoints/` | Thin scripts PyInstaller builds. Each has a `main()` and a `__main__` guard. |
-| `src/runRPC.bat` | Batch file the launcher shim runs. Ships in the release. |
+| `src/entrypoints/launcher.py` | The shim the Paradox launcher spawns. Stdlib-only, on purpose. |
 | `src/save games/` | Sample save for running from source. |
 | `assets/` | Mirror of the flag images uploaded to the Discord developer portal. Nothing reads it at runtime. |
 | `tests/` | The pytest suite. |
@@ -68,8 +68,15 @@ it cannot prove the build links.
 
 **Executable names are load-bearing.** `setup.exe`, `uninstall.exe`,
 `runRPC.exe`, `hoi4Presence.exe` and `checkupdate.exe` are referenced as strings
-by `runRPC.bat`, the installer and the updater. Rename the source script if you
+by `launcher.py`, the installer and the updater. Rename the source script if you
 must; never rename the exe. `tests/test_packaging.py` pins them.
+
+**`launcher.py` duplicates its constants deliberately.** It is the first link in
+the launch chain, so it imports nothing from `hoi4presence` — nothing it needs
+can then fail to import. That makes it the one place a rename in `steps.py` or
+`paths.py` can silently pass;
+`tests/test_packaging.py::test_the_shim_agrees_with_the_names_everything_else_uses`
+is what stops it.
 
 **`version.json` at the repository root is the only version.** `build.spec`
 derives the release zip name from it and the updater compares against it. Do not
@@ -123,10 +130,6 @@ with the reason rather than deleting the test.
   can no longer be mistaken for an update. But the asset name is still derived
   from the tag, so a tag that is not exactly `v<version>` produces a release the
   updater will never find. `tests/test_packaging.py` pins the convention.
-- **`runRPC.bat` could be folded into `launcher.py`.** The batch file is a
-  removable layer, but it is still referenced by the installer, the uninstaller
-  and `build.spec`, and removing it changes the installed runtime chain — which
-  can only be validated on Windows.
 - **`BEG` (Benishangul-Gumuz Nation) has no flag.** It was showing Bangladesh's;
   the wiki is behind a bot challenge so the real image could not be confirmed and
   it falls back to the default logo. The likely URL is noted in a comment beside

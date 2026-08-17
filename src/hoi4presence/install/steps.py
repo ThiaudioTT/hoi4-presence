@@ -9,28 +9,37 @@ from __future__ import annotations
 from collections.abc import Iterable, Sequence
 
 # The files the installer moves around, by name. These are load-bearing:
-# build.spec and runRPC.bat refer to the same strings. Rename the source script
+# build.spec and launcher.py refer to the same strings. Rename the source script
 # if you must; never rename the exe. See AGENTS.md.
 #
-# `launcher.py` repeats BATCH_NAME rather than importing it: the shim is the
-# first link in the launch chain and is deliberately stdlib-only.
-BATCH_NAME = "runRPC.bat"
+# `launcher.py` repeats these rather than importing them: the shim is the first
+# link in the launch chain and is deliberately stdlib-only.
 SHIM_NAME = "runRPC.exe"
+UPDATER_EXE = "checkupdate.exe"
 PRESENCE_EXE = "hoi4Presence.exe"
 LAUNCHER_SETTINGS = "launcher-settings.json"
 
-# Files the release zip must contain for an install to be possible.
+# Written into the game folder at install time, holding the documents path the
+# installer resolved -- the one thing the shim cannot work out for itself.
+CONFIG_NAME = "runRPC.cfg"
+
+# Up to 1.3.x the shim ran a batch file that carried that path instead. Old
+# installs still have a copy sitting in the game folder; setup and uninstall
+# clear it. Drop this once nobody is upgrading from 1.3.x any more.
+LEGACY_BATCH_NAME = "runRPC.bat"
+
+# Files the release zip must contain for an install to be possible. CONFIG_NAME
+# is not among them: the installer writes it, the build does not ship it.
 REQUIRED_DIST_FILES = (
-    "checkupdate.exe",
+    UPDATER_EXE,
     PRESENCE_EXE,
     "version.json",
-    BATCH_NAME,
     SHIM_NAME,
 )
 
 # The launcher's exePath/exeArgs before and after installation. The Paradox
-# launcher spawns its target without a shell and cannot run a .bat directly,
-# hence the runRPC.exe shim.
+# launcher spawns its target with its own arguments prepended, so the shim
+# re-launches the game with the argument order we control.
 PRESENCE_LAUNCHER = ("./runRPC.exe", [])
 VANILLA_LAUNCHER = ("./hoi4.exe", ["-gdpr-compliant"])
 
@@ -78,12 +87,3 @@ def setLauncherExe(launcher: dict, *, install: bool) -> dict:
     updated["exePath"] = exePath
     updated["exeArgs"] = list(exeArgs)
     return updated
-
-
-def rewriteBatchDocumentsPath(lines: Sequence[str], documentsPath: str) -> list[str]:
-    """Replace the ``documentsPath`` assignment on the first line of runRPC.bat."""
-    rewritten = list(lines)
-    if not rewritten:
-        raise ValueError("runRPC.bat is empty")
-    rewritten[0] = f'set "documentsPath={documentsPath}"\n'
-    return rewritten

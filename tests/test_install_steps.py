@@ -12,7 +12,6 @@ from hoi4presence.install.steps import (
     REQUIRED_DIST_FILES,
     findMissingFiles,
     isUpdateMode,
-    rewriteBatchDocumentsPath,
     setBinarySaves,
     setLauncherExe,
 )
@@ -132,17 +131,3 @@ def test_install_then_uninstall_restores_the_launcher(dataDir):
     launcher = json.loads(dataDir.joinpath("launcher-settings.json").read_text(encoding="utf-8"))
 
     assert setLauncherExe(setLauncherExe(launcher, install=True), install=False) == launcher
-
-
-def test_the_batch_documents_path_is_rewritten():
-    lines = ['set "documentsPath=C:\\old"\n', "echo hello\n", "exit\n"]
-
-    rewritten = rewriteBatchDocumentsPath(lines, "D:\\Games\\HOI4")
-
-    assert rewritten[0] == 'set "documentsPath=D:\\Games\\HOI4"\n'
-    assert rewritten[1:] == lines[1:]
-
-
-def test_rewriting_an_empty_batch_file_raises():
-    with pytest.raises(ValueError):
-        rewriteBatchDocumentsPath([], "D:\\Games")

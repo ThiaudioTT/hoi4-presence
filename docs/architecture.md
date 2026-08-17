@@ -28,16 +28,23 @@ starting the game normally also starts the presence:
 ```
 Paradox launcher
   └─ runRPC.exe          (src/entrypoints/launcher.py)
-       └─ runRPC.bat     (src/runRPC.bat)
-            ├─ hoi4.exe -gdpr-compliant
-            ├─ checkupdate.exe   (src/entrypoints/checkupdate.py)
-            └─ hoi4Presence.exe  (src/entrypoints/hoi4RPC.py)
+       ├─ hoi4.exe -gdpr-compliant
+       ├─ checkupdate.exe   (src/entrypoints/checkupdate.py)
+       └─ hoi4Presence.exe  (src/entrypoints/hoi4RPC.py)
 ```
 
-`runRPC.exe` exists because the launcher spawns its target without a shell and
-therefore cannot run a `.bat` directly. It also prepends its own arguments
-(session token, account id), so the shim re-launches with the argument order we
+`runRPC.exe` exists because the launcher prepends its own arguments (session
+token, account id), so the shim re-launches the game with the argument order we
 control.
+
+It finds the other two executables by reading `runRPC.cfg`, a one-line UTF-8 file
+the installer drops beside it holding the documents path it resolved — the one
+thing the shim cannot work out for itself, since the documents folder is not
+always where `%USERPROFILE%` says it is.
+
+The game is started **first and unconditionally**, outside the `try`. `runRPC` is
+built with `console=False`, so a failure in here is invisible; a missing or
+corrupt `runRPC.cfg` has to cost the presence, never the Play button.
 
 ## The polling loop
 
@@ -74,7 +81,7 @@ Those constants live at the top of `hoi4presence.saves` and
 | --- | --- |
 | `Documents\...\Hearts of Iron IV\hoi4Presence\` | the payload is copied here |
 | `Documents\...\Hearts of Iron IV\settings.txt` | `save_as_binary=yes` → `no` |
-| `<game folder>\runRPC.exe`, `runRPC.bat` | copied in |
+| `<game folder>\runRPC.exe` | copied in, plus a generated `runRPC.cfg` |
 | `<game folder>\launcher-settings.json` | `exePath` → `./runRPC.exe`, `exeArgs` → `[]` |
 
 Both find those folders by looking for a marker file (`settings.txt` and
@@ -126,7 +133,6 @@ discordRPC/dist/
     hoi4Presence.exe
     checkupdate.exe
     runRPC.exe
-    runRPC.bat
     version.json
 ```
 

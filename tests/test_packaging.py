@@ -30,7 +30,7 @@ def test_build_spec_builds_every_entrypoint(buildSpecTargets):
 
 
 def test_build_spec_exe_names_are_unchanged(buildSpecTargets):
-    """These names are referenced as strings by runRPC.bat and the updater."""
+    """These names are referenced as strings by the shim and the updater."""
     assert {name for _, name, _ in buildSpecTargets} == EXPECTED_EXES
 
 
@@ -46,7 +46,7 @@ def test_required_dist_files_match_what_the_build_produces(buildSpecTargets):
     """The installer's checklist and the build output must not drift apart."""
     payloadExes = {f"{name}.exe" for _, name, _ in buildSpecTargets} - {"setup.exe", "uninstall.exe"}
 
-    assert set(REQUIRED_DIST_FILES) == payloadExes | {"runRPC.bat", "version.json"}
+    assert set(REQUIRED_DIST_FILES) == payloadExes | {"version.json"}
 
 
 @pytest.mark.parametrize("scriptName", ENTRYPOINT_NAMES)
@@ -86,19 +86,44 @@ def test_the_release_asset_name_matches_the_build_output(repoRoot):
     assert assetName(f"v{version}") == f"hoi4-presence-v{version}.zip"
 
 
-def test_the_batch_file_resolves_the_documents_folder_from_the_profile(repoRoot):
-    """Regression: %USERNAME% is not always the name of the profile folder.
+def test_the_shim_agrees_with_the_names_everything_else_uses(repoRoot):
+    """launcher.py duplicates these rather than importing them.
 
-    A renamed account, a domain profile or a profile on another drive left the
-    batch file pointing at a path that does not exist, so neither the presence
-    nor the updater ever started -- while the game did, because it is launched
-    from a relative path. The installer builds its default from %USERPROFILE%,
-    so the batch file has to agree.
+    That is deliberate -- it is the first link in the launch chain and stays
+    stdlib-only -- but it makes the duplication the one coupling in the chain
+    nothing else enforces. A rename in steps.py or paths.py that misses the shim
+    leaves the game starting and the presence silently never showing up.
     """
-    firstLine = (repoRoot / "src" / "runRPC.bat").read_text(encoding="utf-8").splitlines()[0]
+    import hoi4presence.paths as paths
+    from hoi4presence.install import steps
 
-    assert "%USERPROFILE%" in firstLine
-    assert "%USERNAME%" not in firstLine
+    tree = ast.parse((repoRoot / "src" / "entrypoints" / "launcher.py").read_text(encoding="utf-8"))
+    shim = {}
+    for node in tree.body:
+        if isinstance(node, ast.Assign):
+            try:
+                shim[node.targets[0].id] = ast.literal_eval(node.value)
+            except ValueError:
+                pass
+
+    assert shim["CONFIG_NAME"] == steps.CONFIG_NAME
+    assert shim["UPDATER_EXE"] == steps.UPDATER_EXE
+    assert shim["PRESENCE_EXE"] == steps.PRESENCE_EXE
+    assert shim["GAME_EXE"] == paths.GAME_EXE
+    assert shim["INSTALL_DIR_NAME"] == paths.INSTALL_DIR_NAME
+    # Launching through the shim must hand the game the same arguments the
+    # launcher passes it when the presence is not installed.
+    assert shim["GAME_ARGS"] == list(steps.VANILLA_LAUNCHER[1])
+    assert steps.VANILLA_LAUNCHER[0].endswith(shim["GAME_EXE"])
+
+
+def test_no_batch_file_is_left_in_the_launch_chain(repoRoot):
+    """The shim runs the game itself now; cmd.exe is out of the chain.
+
+    A .bat reappearing means shell=True, the console codepage and CRLF line
+    endings come back with it. All three were bugs; see the CHANGELOG.
+    """
+    assert not list((repoRoot / "src").rglob("*.bat"))
 
 
 def test_workflows_reference_the_licence_file_that_exists(repoRoot):

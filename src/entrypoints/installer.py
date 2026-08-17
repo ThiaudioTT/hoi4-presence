@@ -9,7 +9,8 @@ What it does, in order:
 2. stop a running presence (auto-update only);
 3. locate the HOI4 documents folder and copy the payload into it;
 4. turn off binary saves, so the presence can read them;
-5. locate the game folder and drop the launcher shim in;
+5. locate the game folder, drop the launcher shim in and write the documents
+   path beside it as runRPC.cfg, which is how the shim finds the payload;
 6. point launcher-settings.json at that shim.
 """
 
@@ -28,14 +29,14 @@ import subprocess
 import time
 
 from hoi4presence.install.steps import (
-    BATCH_NAME,
+    CONFIG_NAME,
     LAUNCHER_SETTINGS,
+    LEGACY_BATCH_NAME,
     PRESENCE_EXE,
     REQUIRED_DIST_FILES,
     SHIM_NAME,
     findMissingFiles,
     isUpdateMode,
-    rewriteBatchDocumentsPath,
     setBinarySaves,
     setLauncherExe,
 )
@@ -50,11 +51,6 @@ from hoi4presence.paths import (
 )
 
 SOURCE_SUBPATH = Path("discordRPC") / "dist"
-
-# cmd.exe reads a .bat in the console codepage, not UTF-8. Writing the documents
-# path as UTF-8 would corrupt any non-ASCII character in it -- and this rewrite
-# only happens for non-default paths, i.e. exactly the ones likely to have them.
-BATCH_ENCODING = "oem" if os.name == "nt" else "utf-8"
 
 IS_UPDATE = False
 
@@ -125,22 +121,6 @@ def main() -> int:
         return fail(f"{error}\nRun setup.exe by hand to finish the update.", delay=3)
     print("Documents directory found")
 
-    # The batch file hardcodes the documents path, so always write the one we
-    # just resolved. Rewriting it only for non-default paths meant a second
-    # install from the same extracted folder kept the first install's path, and
-    # left whatever the shipped file happened to guess in place otherwise.
-    batchPath = source / BATCH_NAME
-    print("Updating the runRPC.bat...\n")
-    try:
-        lines = batchPath.read_text(encoding=BATCH_ENCODING).splitlines(keepends=True)
-        batchPath.write_text(
-            "".join(rewriteBatchDocumentsPath(lines, str(documents))),
-            encoding=BATCH_ENCODING,
-        )
-    # ValueError covers both an empty runRPC.bat and an undecodable one.
-    except (OSError, ValueError) as error:
-        return fail(f"{error}\nCan't change the runRPC.bat")
-
     # Copy the payload next to the saves.
     installDir = documents / INSTALL_DIR_NAME
     try:
@@ -170,11 +150,20 @@ def main() -> int:
     print("Game directory found")
 
     try:
-        print(f"Moving {BATCH_NAME} and {SHIM_NAME} to the game folder...\n{gameFolder}")
-        shutil.copyfile(batchPath, gameFolder / BATCH_NAME)
+        print(f"Moving {SHIM_NAME} to the game folder...\n{gameFolder}")
         shutil.copyfile(source / SHIM_NAME, gameFolder / SHIM_NAME)
+
+        # The shim cannot work the documents folder out for itself, so hand it
+        # the one we just resolved. Written unconditionally: doing this only for
+        # non-default paths meant a second install from the same extracted
+        # folder kept the first install's path.
+        print(f"Writing {CONFIG_NAME}...")
+        (gameFolder / CONFIG_NAME).write_text(str(documents), encoding="utf-8")
+
+        # Upgrades from 1.3.x leave a runRPC.bat here that nothing runs now.
+        (gameFolder / LEGACY_BATCH_NAME).unlink(missing_ok=True)
     except OSError as error:
-        return fail(f"{error}\nCan't move the {BATCH_NAME} to the game folder", delay=3)
+        return fail(f"{error}\nCan't set up the {SHIM_NAME} in the game folder", delay=3)
 
     # 4 - point the Paradox launcher at the shim
     try:
@@ -197,9 +186,8 @@ def main() -> int:
     time.sleep(5)
 
     if IS_UPDATE:
-        # Start the presence itself. Starting the launcher shim would run
-        # runRPC.bat, which also starts hoi4.exe -- on top of the game the user
-        # is already playing.
+        # Start the presence itself. Starting the launcher shim would also start
+        # hoi4.exe -- on top of the game the user is already playing.
         os.startfile(installDir / PRESENCE_EXE)
 
     return 0

@@ -42,8 +42,8 @@ def versionDir() -> Path:
 
 
 def main() -> int:
-    # Its own file: runRPC.bat starts this and hoi4Presence.exe together, and a
-    # RotatingFileHandler shared between two processes breaks on rollover.
+    # Its own file: the launcher shim starts this and hoi4Presence.exe together,
+    # and a RotatingFileHandler shared between two processes breaks on rollover.
     setupLogging(getBaseDir(__file__), fileName="checkupdate.log")
     logger.info("Checking for updates in hoi4 presence...")
 
