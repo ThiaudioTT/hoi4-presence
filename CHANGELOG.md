@@ -13,6 +13,24 @@ summaries rather than a complete record.
 
 ### Added
 
+- A console UI for `setup.exe`, `uninstall.exe` and `checkupdate.exe`, built on
+  `rich`. Each stage of an install now gets a labelled progress bar that stays on
+  screen for at least 1.2 seconds, so the whole thing is watchable instead of a
+  wall of `print` output that scrolled past in well under a second. Errors get a
+  panel and wait for a keypress rather than a three-second `sleep`.
+
+  `checkupdate.exe` had a console window it never wrote anything to — every
+  message went to `checkupdate.log`, so a download in progress looked like a
+  blank box sitting on top of the game. It now shows a real byte-count bar, and
+  only when there is actually an update: the up-to-date path still writes nothing
+  and exits immediately, because it runs on every single launch.
+
+  `setup.exe` and `uninstall.exe` now ask for confirmation before touching
+  anything, and declining exits without changing a thing. Each finished stage
+  leaves a `DONE` in the right-hand column, and `setup.exe`'s success screen
+  cycles block-art flags for the seven majors until you press Enter. None of
+  this applies to an auto-update, which has nobody at the console: it neither
+  asks, nor animates, nor waits.
 - A pytest suite covering the country table, save parsing, presence payloads,
   path discovery, the updater and the installer transforms.
 - A `Tests` workflow running ruff and pytest on Linux and Windows. Both build
@@ -69,9 +87,28 @@ summaries rather than a complete record.
 - The filenames shared by the installer, the uninstaller and the payload check
   (`runRPC.bat`, `runRPC.exe`, `hoi4Presence.exe`, `launcher-settings.json`) are
   defined once in `hoi4presence.install.steps`.
+- `checkupdate.exe` starts `setup.exe -update` after it has finished with the
+  console rather than before. `start_new_session` does not give the child its own
+  console on Windows, so the two would have been drawing over each other.
+- `setupLogging` takes `stream=False`. A `StreamHandler` binds `sys.stderr` when
+  it is constructed, so one created before a progress bar starts cannot be
+  intercepted by it, and its records land on the terminal raw.
+- `release.formatProgress` is gone; `rich` renders the download progress now.
 
 ### Fixed
 
+- Both build workflows could fail to replace their rolling prerelease. The step
+  was `gh release delete <tag> --yes --cleanup-tag || echo "no existing release"`,
+  which swallowed every failure rather than just "there was nothing to delete" —
+  so a transient `HTTP 503` from the GitHub API read as success, and the
+  `gh release create` that followed died with *"a release with the same tag name
+  already exists"*. The delete is now retried, only a genuine absence is allowed
+  through, and a build that cannot clear the old release fails loudly instead of
+  publishing over it. A tag left behind by a half-completed delete is cleared
+  too, since `gh release create` silently attaches to an existing tag and
+  ignores `--target`, which would publish the build against an older commit.
+- The build workflows now check that a `.zip` was actually produced before
+  publishing, rather than letting `Get-Item *.zip` match nothing.
 - `ICE` was defined twice in the country table; the second entry silently won,
   so Iceland used a wiki URL and its uploaded flag asset was never shown.
 - `BEG` (Benishangul-Gumuz Nation) was showing Bangladesh's flag. No verified

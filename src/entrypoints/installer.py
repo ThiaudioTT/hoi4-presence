@@ -1,7 +1,8 @@
 """Entry point for setup.exe -- installs the presence into a HOI4 install.
 
-This is a console wizard, so it talks to the user with print() rather than the
-logger; the windowed executables are the ones that need a log file.
+This is a console wizard, so it talks to the user through
+:class:`hoi4presence.ui.Wizard` rather than the logger; the windowed executables
+are the ones that need a log file.
 
 What it does, in order:
 
@@ -49,35 +50,19 @@ from hoi4presence.paths import (
     findGameDir,
     getBaseDir,
 )
+from hoi4presence.ui import Wizard
 
 SOURCE_SUBPATH = Path("discordRPC") / "dist"
 
-IS_UPDATE = False
+# Every stage below, plus "stop the running presence" on the auto-update path.
+BASE_STEPS = 7
 
-
-def customInput(prompt: str = "") -> str | None:
-    """Wait for the user, unless the auto-updater is driving us headlessly."""
-    if not IS_UPDATE:
-        return input(prompt)
-    return None
-
-
-def promptForPath(prompt: str) -> str:
-    """Ask the user where a folder is. The auto-updater has nobody to ask.
-
-    Raising here rather than blocking matters: an auto-update runs behind the
-    game with a console the user is not looking at, and it has already stopped
-    the running presence by this point.
-    """
-    if IS_UPDATE:
-        raise RuntimeError("Cannot ask for a folder during an auto-update.")
-    return input(prompt)
-
-
-def fail(message: str, *, delay: int = 10) -> int:
-    print(f"\n{message}\n\nExiting...")
-    time.sleep(delay)
-    return 1
+# Windows frees a deleted directory lazily, so copytree can still trip over the
+# one we just removed. Nothing to do with the wizard's pacing, which is 1.2s at
+# best and zero during an auto-update.
+RMTREE_SETTLE_SECONDS = 2
+# Let the copied files settle before the freshly installed presence opens them.
+RESTART_DELAY_SECONDS = 5
 
 
 def verifyPayload(source: Path) -> list[str] | None:
@@ -89,105 +74,116 @@ def verifyPayload(source: Path) -> list[str] | None:
 
 
 def main() -> int:
-    global IS_UPDATE
-    IS_UPDATE = isUpdateMode(sys.argv)
+    isUpdate = isUpdateMode(sys.argv)
 
-    print("This script will install the hoi4-presence in your game/save path\nPress enter to continue...")
-    customInput()
+    with Wizard(
+        "hoi4-presence setup",
+        "Installs the Discord Rich Presence into your Hearts of Iron IV install.",
+        totalSteps=BASE_STEPS + 1 if isUpdate else BASE_STEPS,
+        interactive=not isUpdate,
+    ) as wizard:
+        if not wizard.confirm("Install hoi4-presence into your Hearts of Iron IV folder?"):
+            wizard.finish("Cancelled. Nothing on your system was changed.")
+            return 0
 
-    # Next to setup.exe, not in the working directory: "Run as administrator"
-    # launches with cwd set to System32, and the auto-updater launches setup.exe
-    # from the folder it unpacked into.
-    source = getBaseDir() / SOURCE_SUBPATH
+        # Next to setup.exe, not in the working directory: "Run as administrator"
+        # launches with cwd set to System32, and the auto-updater launches setup.exe
+        # from the folder it unpacked into.
+        source = getBaseDir() / SOURCE_SUBPATH
 
-    print("Verifying required files...")
-    missing = verifyPayload(source)
-    if missing is None:
-        return fail(f"Error: Could not find the 'dist' directory\n{source}")
-    if missing:
-        return fail(f"Error: The following files were not found in {source}:\n\n{', '.join(missing)}")
-    print("All required files are valid!")
+        with wizard.step("Verifying the release files"):
+            missing = verifyPayload(source)
 
-    if IS_UPDATE:
-        print("Stopping any running instances of hoi4Presence.exe...")
-        # Best effort: taskkill exits 128 when the process is not running, which
-        # is the normal case -- the presence exits as soon as the game does.
-        subprocess.run(["taskkill", "/f", "/im", PRESENCE_EXE], capture_output=True)
+        # Outside the step: a `return` is not an exception, so the step would
+        # otherwise be marked complete on the way out.
+        if missing is None:
+            return wizard.fail(f"Could not find the 'dist' directory\n{source}")
+        if missing:
+            return wizard.fail(f"These files were not found in {source}:\n\n{', '.join(missing)}")
 
-    # 1 - locate the documents folder, recognised by settings.txt
-    try:
-        documents = findDocumentsDir(defaultDocumentsDir(), promptForPath, print)
-    except RuntimeError as error:
-        return fail(f"{error}\nRun setup.exe by hand to finish the update.", delay=3)
-    print("Documents directory found")
+        if isUpdate:
+            with wizard.step(f"Stopping any running {PRESENCE_EXE}"):
+                # Best effort: taskkill exits 128 when the process is not running,
+                # which is the normal case -- the presence exits as soon as the game
+                # does. capture_output keeps its stdio off our console.
+                subprocess.run(["taskkill", "/f", "/im", PRESENCE_EXE], capture_output=True)
 
-    # Copy the payload next to the saves.
-    installDir = documents / INSTALL_DIR_NAME
-    try:
-        if installDir.exists():
-            print("Old installation found, deleting...")
-            shutil.rmtree(installDir)
-            time.sleep(2)
-        print(f"\nMoving...\n{documents}\n{installDir}")
-        shutil.copytree(source, installDir)
-    except OSError as error:
-        return fail(f"{error}\nCan't move the hoi4Presence to the save Path", delay=3)
+        # 1 - locate the documents folder, recognised by settings.txt
+        try:
+            with wizard.step("Locating the HOI4 documents folder"):
+                documents = findDocumentsDir(defaultDocumentsDir(), wizard.ask, wizard.warn)
+        except RuntimeError as error:
+            return wizard.fail(f"{error}\n\nRun setup.exe by hand to finish the update.")
 
-    # 2 - the presence can only read plaintext saves
-    try:
-        settingsPath = documents / SETTINGS_FILE
-        print(f"Writing save_as_binary=no in {SETTINGS_FILE}...")
-        settings = settingsPath.read_text(encoding="utf-8")
-        settingsPath.write_text(setBinarySaves(settings, enabled=False), encoding="utf-8")
-    except (OSError, ValueError) as error:
-        return fail(f"{error}\nCan't change the {SETTINGS_FILE}", delay=3)
+        # Copy the payload next to the saves.
+        installDir = documents / INSTALL_DIR_NAME
+        try:
+            with wizard.step(f"Installing the presence into {INSTALL_DIR_NAME}"):
+                if installDir.exists():
+                    wizard.warn("Old installation found, deleting it first")
+                    shutil.rmtree(installDir)
+                    time.sleep(RMTREE_SETTLE_SECONDS)
+                shutil.copytree(source, installDir)
+        except OSError as error:
+            return wizard.fail(f"{error}\n\nCan't move the hoi4Presence to the save path")
 
-    # 3 - locate the game folder, recognised by hoi4.exe
-    try:
-        gameFolder = findGameDir(defaultGameDir(), promptForPath, print)
-    except RuntimeError as error:
-        return fail(f"{error}\nRun setup.exe by hand to finish the update.", delay=3)
-    print("Game directory found")
+        # 2 - the presence can only read plaintext saves
+        try:
+            with wizard.step(f"Writing save_as_binary=no in {SETTINGS_FILE}"):
+                settingsPath = documents / SETTINGS_FILE
+                settings = settingsPath.read_text(encoding="utf-8")
+                settingsPath.write_text(setBinarySaves(settings, enabled=False), encoding="utf-8")
+        except (OSError, ValueError) as error:
+            return wizard.fail(f"{error}\n\nCan't change the {SETTINGS_FILE}")
 
-    try:
-        print(f"Moving {SHIM_NAME} to the game folder...\n{gameFolder}")
-        shutil.copyfile(source / SHIM_NAME, gameFolder / SHIM_NAME)
+        # 3 - locate the game folder, recognised by hoi4.exe
+        try:
+            with wizard.step("Locating the game folder"):
+                gameFolder = findGameDir(defaultGameDir(), wizard.ask, wizard.warn)
+        except RuntimeError as error:
+            return wizard.fail(f"{error}\n\nRun setup.exe by hand to finish the update.")
 
-        # The shim cannot work the documents folder out for itself, so hand it
-        # the one we just resolved. Written unconditionally: doing this only for
-        # non-default paths meant a second install from the same extracted
-        # folder kept the first install's path.
-        print(f"Writing {CONFIG_NAME}...")
-        (gameFolder / CONFIG_NAME).write_text(str(documents), encoding="utf-8")
+        try:
+            with wizard.step(f"Installing {SHIM_NAME} into the game folder"):
+                shutil.copyfile(source / SHIM_NAME, gameFolder / SHIM_NAME)
 
-        # Upgrades from 1.3.x leave a runRPC.bat here that nothing runs now.
-        (gameFolder / LEGACY_BATCH_NAME).unlink(missing_ok=True)
-    except OSError as error:
-        return fail(f"{error}\nCan't set up the {SHIM_NAME} in the game folder", delay=3)
+                # The shim cannot work the documents folder out for itself, so hand it
+                # the one we just resolved. Written unconditionally: doing this only for
+                # non-default paths meant a second install from the same extracted
+                # folder kept the first install's path.
+                (gameFolder / CONFIG_NAME).write_text(str(documents), encoding="utf-8")
 
-    # 4 - point the Paradox launcher at the shim
-    try:
-        print(f"Changing {LAUNCHER_SETTINGS}...")
-        launcherPath = gameFolder / LAUNCHER_SETTINGS
-        launcher = json.loads(launcherPath.read_text(encoding="utf-8"))
-        launcherPath.write_text(
-            json.dumps(setLauncherExe(launcher, install=True), indent=4),
-            encoding="utf-8",
+                # Upgrades from 1.3.x leave a runRPC.bat here that nothing runs now.
+                (gameFolder / LEGACY_BATCH_NAME).unlink(missing_ok=True)
+        except OSError as error:
+            return wizard.fail(f"{error}\n\nCan't set up the {SHIM_NAME} in the game folder")
+
+        # 4 - point the Paradox launcher at the shim
+        try:
+            with wizard.step(f"Pointing {LAUNCHER_SETTINGS} at {SHIM_NAME}"):
+                launcherPath = gameFolder / LAUNCHER_SETTINGS
+                launcher = json.loads(launcherPath.read_text(encoding="utf-8"))
+                launcherPath.write_text(
+                    json.dumps(setLauncherExe(launcher, install=True), indent=4),
+                    encoding="utf-8",
+                )
+        except (OSError, ValueError) as error:
+            return wizard.fail(f"{error}\n\nCan't change the {LAUNCHER_SETTINGS}")
+
+        wizard.finish(
+            "Success! The hoi4Presence is installed in your game folder.",
+            "",
+            "Start the game through the Paradox launcher to activate the presence.",
+            "",
+            "See https://github.com/ThiaudioTT/hoi4-presence for updates and more information.",
+            flags=True,
         )
-    except (OSError, ValueError) as error:
-        return fail(f"{error}\nCan't change the {LAUNCHER_SETTINGS}", delay=3)
 
-    print("\n\nSuccess! The hoi4Presence is installed in your game folder.\n\n")
-    print("Execute the game via launcher to auto activate the presence.\n\n")
-    print("Keep uninstall.exe -- it is the only copy, and it is not installed anywhere else.\n\n")
-    print("See https://github.com/ThiaudioTT/hoi4-presence for updates and more information.\n\n")
-
-    customInput()
-    time.sleep(5)
-
-    if IS_UPDATE:
+    if isUpdate:
+        time.sleep(RESTART_DELAY_SECONDS)
         # Start the presence itself. Starting the launcher shim would also start
-        # hoi4.exe -- on top of the game the user is already playing.
+        # hoi4.exe -- on top of the game the user is already playing. Outside the
+        # wizard, so the console is ours no longer.
         os.startfile(installDir / PRESENCE_EXE)
 
     return 0

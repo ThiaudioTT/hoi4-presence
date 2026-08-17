@@ -106,7 +106,9 @@ and the image comes in two flavours:
 
 `checkupdate.exe` runs alongside the game and writes its own `checkupdate.log`
 — it and `hoi4Presence.exe` start together, and a `RotatingFileHandler` shared
-between two processes breaks on rollover.
+between two processes breaks on rollover. It logs to that file *only*: it has a
+console, but that belongs to the wizard described below, and a `StreamHandler`
+would print over the progress bar rather than through it.
 
 It compares the local `version.json` with the copy on `main`, and if
 `auto-update` is on and the local one is older it fetches the release tagged
@@ -120,6 +122,51 @@ on `main`, while `/releases/latest` can resolve to a rolling prerelease such as
 pushed yet — whose asset would reinstall the version the user already has, on
 every launch. Fetching by tag also means the tag has to be exactly `v<version>`,
 which is what `build.spec` names the zip.
+
+## The console UI
+
+`setup.exe`, `uninstall.exe` and `checkupdate.exe` are the three executables
+built with a console, so for them the terminal *is* the interface. All three
+drive `hoi4presence.ui.Wizard`, which gives each stage a progress bar and holds
+it on screen for at least `MIN_STEP_SECONDS` — the real work is a JSON edit and
+four file copies, which used to finish faster than anyone could read.
+
+`Wizard.step()` yields an `onProgress(done, total)` callback. Ignore it and the
+bar pulses for however long the work takes, then fills over the remainder of the
+minimum; call it, as `checkupdate` does with `downloadUpdate`, and the bar tracks
+real bytes instead. Either way the step leaves a permanent `✓ … DONE` line, or
+`✗ … FAILED` if it raised. `Wizard.ask`/`Wizard.warn` are the prompt/log pair
+`paths.findDirContaining` takes, which is how the retry loop for a non-default
+install folder ends up inside the display.
+
+`setup.exe` and `uninstall.exe` both open with `Wizard.confirm()`, so nothing is
+touched until the user agrees; declining exits 0 having changed nothing.
+`setup.exe` closes with `finish(flags=True)`, which cycles the majors' flags
+under the success panel until Enter. The read runs on its own thread, because
+rich cannot animate and block on `input()` at the same time — the animation
+waits on the same event the reader sets, so Enter ends it at once instead of
+after the current flag times out.
+
+`interactive` is the one switch that matters. `setup.exe -update` runs behind the
+game the user is already playing, on a console nobody is looking at, so an
+auto-update passes `interactive=False`: no keypress pauses, no pacing, and
+`ask()` raises rather than blocking. That last one is a fix, not a nicety — the
+updater has already stopped the running presence by the time it looks for a
+folder, so a user whose install is not at the default used to leave `setup.exe`
+waiting forever.
+
+Two ordering rules the code comments repeat, because breaking either is
+invisible until it is on a user's screen:
+
+- rich allows one live display at a time, so `finish(flags=True)` stops the
+  progress bar before starting its own.
+- `checkupdate` spawns `setup.exe -update` **after** leaving its `with` block.
+  `start_new_session` does not give the child a new console on Windows, so both
+  processes would otherwise be drawing on the same screen buffer.
+
+The two windowed executables must never import this module. They are built
+`console=False`, so `sys.stdout` is `None` and rich renders into a void;
+`launcher.py` is stdlib-only besides. `tests/test_packaging.py` enforces it.
 
 ## Building
 

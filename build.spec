@@ -40,7 +40,13 @@ for scriptPath, exeName, hasConsole in TARGETS:
         hookspath=[],
         hooksconfig={},
         runtime_hooks=[],
-        excludes=[],
+        # rich hard-depends on pygments and markdown-it-py, so pip installs them
+        # into the build environment -- but only rich.syntax, rich.markdown and
+        # rich.traceback reach them, and hoi4presence.ui imports none of those.
+        # Excluding them keeps several MB per exe out of the release if a hook
+        # ever decides to collect_all("rich"). Drop this if anyone wants
+        # RichHandler(rich_tracebacks=True).
+        excludes=["pygments", "markdown_it", "mdurl"],
         win_no_prefer_redirects=False,
         win_private_assemblies=False,
         cipher=block_cipher,

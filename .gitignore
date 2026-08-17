@@ -11,6 +11,10 @@ __pycache__/
 hoi4-presence*/
 .venv/
 
+# Written next to the executable, so running an entry point from source drops
+# one in src/entrypoints/.
+*.log
+
 # Test / lint caches
 .pytest_cache/
 .ruff_cache/

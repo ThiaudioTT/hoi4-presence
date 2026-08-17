@@ -117,6 +117,28 @@ def test_the_shim_agrees_with_the_names_everything_else_uses(repoRoot):
     assert steps.VANILLA_LAUNCHER[0].endswith(shim["GAME_EXE"])
 
 
+@pytest.mark.parametrize("scriptName", ["hoi4RPC.py", "launcher.py"])
+def test_the_windowed_executables_do_not_import_the_console_ui(repoRoot, scriptName):
+    """These two are built console=False, so there is no terminal to draw on.
+
+    rich would render into ``NULL_FILE`` and every bar would go nowhere. Worse,
+    ``launcher.py`` is deliberately stdlib-only -- it is the first link in the
+    launch chain, so nothing it needs may fail to import. Flipping either exe to
+    console=True is not the fix either: that puts a console window on top of the
+    running game.
+    """
+    tree = ast.parse((repoRoot / "src" / "entrypoints" / scriptName).read_text(encoding="utf-8"))
+
+    imported = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imported.update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            imported.add(node.module)
+
+    assert "hoi4presence.ui" not in imported, f"{scriptName} has no console to render a UI into"
+
+
 def test_no_batch_file_is_left_in_the_launch_chain(repoRoot):
     """The shim runs the game itself now; cmd.exe is out of the chain.
 

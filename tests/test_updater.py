@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from hoi4presence.updater.release import assetName, formatProgress, pickReleaseAsset
+from hoi4presence.updater.release import assetName, pickReleaseAsset
 from hoi4presence.updater.version_check import (
     ManifestError,
     isOutdated,
@@ -108,20 +108,6 @@ def test_no_matching_asset_returns_none(releaseAssets):
 
 def test_no_assets_at_all_returns_none():
     assert pickReleaseAsset([], "v1.3.0") is None
-
-
-@pytest.mark.parametrize(
-    ("downloaded", "total", "expected"),
-    [(0, 100, "0%"), (50, 100, "50%"), (100, 100, "100%"), (7, 9, "78%")],
-)
-def test_progress_percentages(downloaded, total, expected):
-    assert formatProgress(downloaded, total) == expected
-
-
-@pytest.mark.parametrize("total", [0, -1])
-def test_unknown_total_does_not_divide_by_zero(total):
-    """Regression: a missing Content-Length used to raise ZeroDivisionError."""
-    assert formatProgress(10, total) == "?%"
 
 
 def test_the_shipped_version_file_is_valid(repoRoot):

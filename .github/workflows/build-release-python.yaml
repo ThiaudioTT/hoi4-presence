@@ -41,6 +41,39 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete beta --yes --cleanup-tag || echo "no existing beta release"
-          gh release create beta --prerelease --title "Beta release" --target main --notes "feature-complete-ish, but still being tested.`n`nAutomated build from ${{ github.sha }}" LICENSE.TXT (Get-Item *.zip)
+          # Exit codes are inspected below, so pin the two settings that decide
+          # whether a failing native command aborts the script rather than
+          # inheriting them. See the matching step in build-dev-python.yaml.
+          $ErrorActionPreference = 'Continue'
+          $PSNativeCommandUseErrorActionPreference = $false
+
+          # Replace the rolling prerelease. `gh release delete ... || echo "..."`
+          # treated a transient HTTP 503 as "nothing to delete", and the create
+          # then failed on the release still sitting there.
+          for ($attempt = 1; $attempt -le 5; $attempt++) {
+            gh release view beta *> $null
+            if ($LASTEXITCODE -ne 0) { break }
+            Write-Host "Deleting the existing beta release (attempt $attempt)..."
+            gh release delete beta --yes --cleanup-tag
+            Start-Sleep -Seconds 5
+          }
+
+          gh release view beta *> $null
+          if ($LASTEXITCODE -eq 0) { throw "The existing beta release could not be deleted." }
+
+          # A half-succeeded delete can leave the tag behind, and
+          # `gh release create` attaches to an existing tag and ignores --target.
+          if (git ls-remote --tags origin refs/tags/beta) {
+            Write-Host "Removing the leftover beta tag..."
+            git push origin :refs/tags/beta
+          }
+
+          # Checked rather than left to `(Get-Item *.zip)`: with the error
+          # preferences above relaxed, a build that produced no zip would publish
+          # a release containing nothing but the licence.
+          $zips = @(Get-Item *.zip -ErrorAction SilentlyContinue)
+          if ($zips.Count -eq 0) { throw "The build produced no .zip to publish." }
+          Write-Host "Publishing: $($zips.Name -join ', ')"
+
+          gh release create beta --prerelease --title "Beta release" --target main --notes "feature-complete-ish, but still being tested.`n`nAutomated build from ${{ github.sha }}" LICENSE.TXT $zips
         shell: pwsh
