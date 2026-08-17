@@ -93,6 +93,18 @@ summaries rather than a complete record.
 
 ### Fixed
 
+- Both build workflows could fail to replace their rolling prerelease. The step
+  was `gh release delete <tag> --yes --cleanup-tag || echo "no existing release"`,
+  which swallowed every failure rather than just "there was nothing to delete" —
+  so a transient `HTTP 503` from the GitHub API read as success, and the
+  `gh release create` that followed died with *"a release with the same tag name
+  already exists"*. The delete is now retried, only a genuine absence is allowed
+  through, and a build that cannot clear the old release fails loudly instead of
+  publishing over it. A tag left behind by a half-completed delete is cleared
+  too, since `gh release create` silently attaches to an existing tag and
+  ignores `--target`, which would publish the build against an older commit.
+- The build workflows now check that a `.zip` was actually produced before
+  publishing, rather than letting `Get-Item *.zip` match nothing.
 - `ICE` was defined twice in the country table; the second entry silently won,
   so Iceland used a wiki URL and its uploaded flag asset was never shown.
 - `BEG` (Benishangul-Gumuz Nation) was showing Bangladesh's flag. No verified

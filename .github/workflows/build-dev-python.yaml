@@ -41,6 +41,49 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete dev --yes --cleanup-tag || echo "no existing dev release"
-          gh release create dev --prerelease --title "Testers build" --target dev --notes "testers build`n`nAutomated build from ${{ github.sha }}" LICENSE.TXT (Get-Item *.zip)
+          # This step inspects exit codes on purpose. GitHub runs pwsh with
+          # $ErrorActionPreference='stop', and $PSNativeCommandUseErrorActionPreference
+          # turns a nonzero exit code from a native command into a terminating
+          # error -- which would abort on the `gh release view` below that is
+          # *expected* to fail. It is off by default in pwsh 7.4, but that default
+          # has moved between releases, so pin both instead of inheriting them.
+          # The final `gh release create` still fails the step via its exit code.
+          $ErrorActionPreference = 'Continue'
+          $PSNativeCommandUseErrorActionPreference = $false
+
+          # Replace the rolling prerelease. This used to be a bare
+          # `gh release delete dev --yes --cleanup-tag || echo "..."`, which
+          # swallowed *every* failure: a transient "HTTP 503: No server is
+          # currently available" read as "there was nothing to delete", and the
+          # create below then died on the release that was still sitting there.
+          # So only a genuine absence is allowed to pass, and a flaky API is
+          # retried rather than mistaken for success.
+          for ($attempt = 1; $attempt -le 5; $attempt++) {
+            gh release view dev *> $null
+            if ($LASTEXITCODE -ne 0) { break }
+            Write-Host "Deleting the existing dev release (attempt $attempt)..."
+            gh release delete dev --yes --cleanup-tag
+            Start-Sleep -Seconds 5
+          }
+
+          gh release view dev *> $null
+          if ($LASTEXITCODE -eq 0) { throw "The existing dev release could not be deleted." }
+
+          # --cleanup-tag normally takes the tag with it, but the delete can half
+          # succeed the same way -- and `gh release create` silently attaches to
+          # an existing tag and ignores --target, which would publish this build
+          # against an older commit.
+          if (git ls-remote --tags origin refs/tags/dev) {
+            Write-Host "Removing the leftover dev tag..."
+            git push origin :refs/tags/dev
+          }
+
+          # Checked rather than left to `(Get-Item *.zip)`: with the error
+          # preferences above relaxed, a build that produced no zip would publish
+          # a release containing nothing but the licence.
+          $zips = @(Get-Item *.zip -ErrorAction SilentlyContinue)
+          if ($zips.Count -eq 0) { throw "The build produced no .zip to publish." }
+          Write-Host "Publishing: $($zips.Name -join ', ')"
+
+          gh release create dev --prerelease --title "Testers build" --target dev --notes "testers build`n`nAutomated build from ${{ github.sha }}" LICENSE.TXT $zips
         shell: pwsh
