@@ -1,18 +1,23 @@
+# Real saves are never committed, but the sample and the test fixtures are.
 *.hoi4
-src/discordRPC/dist/
-src/discordRPC/build/
-src/dist/
-src/build/
+!src/save games/*.hoi4
+!tests/data/*.hoi4
+
 *.exe
+*.zip
 __pycache__/
 /dist/
 /build/
 hoi4-presence*/
-*.zip
 .venv/
-flags/
-releasedCountries.py
-initialCountries.py
-tools/flags/
-tools/releasedCountries.py
-tools/initialCountries.py
+
+# Written next to the executable, so running an entry point from source drops
+# one in src/entrypoints/.
+*.log
+
+# Test / lint caches
+.pytest_cache/
+.ruff_cache/
+
+# Per-machine agent permissions, not a repository policy.
+.claude/settings.local.json

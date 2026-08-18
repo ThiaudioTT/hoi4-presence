@@ -1,0 +1,14 @@
+HOI4txt
+player="JAP"
+ideology=neutrality
+date="1936.1.1.12"
+difficulty="easy"
+version="Operation Postern v1.19.2.0.a729 (d245)"
+tutorial=no
+player_countries={
+	JAP={
+		user="Aaawhn zé da manga"
+		country_leader=yes
+		id=1
+	}
+}

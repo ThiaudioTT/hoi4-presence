@@ -1,0 +1,12 @@
+language="l_english"
+graphics={
+	size={
+		x=1920
+		y=1080
+	}
+	refreshRate=60
+	fullScreen=yes
+}
+save_as_binary=yes
+autosave=monthly
+master_volume=0.500000

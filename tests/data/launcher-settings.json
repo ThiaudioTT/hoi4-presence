@@ -1,0 +1,13 @@
+{
+    "gameId": "hoi4",
+    "version": "2023.10",
+    "rawVersion": "2023.10.1",
+    "exePath": "./hoi4.exe",
+    "exeArgs": [
+        "-gdpr-compliant"
+    ],
+    "browserService": {
+        "url": "https://pdx-launcher.ext.inner.paradoxplaza.com"
+    },
+    "gameDataPath": "%USER_DOCUMENTS%/Paradox Interactive/Hearts of Iron IV"
+}

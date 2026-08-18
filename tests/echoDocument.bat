@@ -1,3 +1,0 @@
-echo %USER_DOCUMENTS%/
-
-IT DOES NOT WORK!

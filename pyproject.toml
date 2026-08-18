@@ -1,0 +1,43 @@
+[project]
+name = "hoi4-presence"
+description = "Discord Rich Presence for Hearts of Iron IV"
+readme = "readme.md"
+license = { file = "LICENSE.TXT" }
+requires-python = ">=3.11"
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/ThiaudioTT/hoi4-presence"
+Issues = "https://github.com/ThiaudioTT/hoi4-presence/issues"
+
+# The project is not pip-installable; it ships as PyInstaller executables built
+# from build.spec. This file exists for the pytest and ruff configuration below.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "src/entrypoints"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = ["build.spec"]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "F",  # pyflakes -- includes F811, the duplicate `import time` class of bug
+    "W",  # pycodestyle warnings
+    "I",  # isort
+    "UP", # pyupgrade
+    "B",  # bugbear
+]
+# `N` (pep8-naming) is deliberately not selected: function names here are
+# camelCase throughout. See the conventions section of AGENTS.md.
+ignore = [
+    "E501", # line length is handled by the formatter
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
