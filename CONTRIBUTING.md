@@ -24,12 +24,36 @@ install to build with `pyinstaller build.spec` (Windows only).
 
 ## Running the code
 
-See the [Development section of the readme](readme.md#development) for running
-the presence against the sample save in `src/save games/`, and
-[docs/architecture.md](docs/architecture.md) for how the pieces fit together.
+Requires Python 3.11+. The test suite runs on any platform; building the
+executables only works on Windows.
 
-[AGENTS.md](AGENTS.md) documents the repository layout and the constraints the
-code has to work within — worth reading before a larger change.
+```sh
+pip install -r requirements-dev.txt   # test + lint tooling
+pytest                                # run the suite
+ruff check . && ruff format .         # lint and format
+```
+
+To run the presence from source, put a **non-binary** `.hoi4` save in
+`src/save games/` (there is a sample there already), make sure Discord is
+running, then:
+
+```sh
+python src/entrypoints/hoi4RPC.py
+```
+
+It reports the newest save in that folder, as long as it was modified in the last
+two minutes, and exits once `hoi4.exe` is no longer running.
+
+To build the executables and the release zip, on Windows:
+
+```sh
+pip install -r requirements.txt
+pyinstaller build.spec
+```
+
+[docs/architecture.md](docs/architecture.md) explains how the pieces fit
+together. [AGENTS.md](AGENTS.md) documents the repository layout and the
+constraints the code has to work within — worth reading before a larger change.
 
 ## Attention after your changes
 
