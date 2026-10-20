@@ -9,6 +9,8 @@ that decides whether a user sees a presence at all.
 
 from __future__ import annotations
 
+import enum
+import json
 import sys
 import types
 
@@ -58,6 +60,9 @@ def runner(monkeypatch):
 
     pypresence = types.ModuleType("pypresence")
     pypresence.Presence = FakePresence
+    pypresenceTypes = types.ModuleType("pypresence.types")
+    pypresenceTypes.StatusDisplayType = enum.IntEnum("StatusDisplayType", {"NAME": 0, "STATE": 1, "DETAILS": 2})
+    pypresence.types = pypresenceTypes
 
     psutil = types.ModuleType("psutil")
     psutil.NoSuchProcess = type("NoSuchProcess", (Exception,), {})
@@ -65,6 +70,7 @@ def runner(monkeypatch):
     psutil.process_iter = lambda attrs=None: []
 
     monkeypatch.setitem(sys.modules, "pypresence", pypresence)
+    monkeypatch.setitem(sys.modules, "pypresence.types", pypresenceTypes)
     monkeypatch.setitem(sys.modules, "psutil", psutil)
     sys.modules.pop("hoi4presence.runner", None)
 
@@ -154,3 +160,24 @@ def test_the_game_process_is_matched_by_its_prefetched_name(runner, monkeypatch)
 
     assert runner.isGameRunning() is True
     assert runner.isGameRunning("notepad.exe") is False
+
+
+def test_a_modded_session_shows_its_mods_in_the_flags_hover_text(runner, monkeypatch, tmp_path):
+    (tmp_path / "mod").mkdir()
+    (tmp_path / "mod" / "tfr.mod").write_text(
+        'name="The Fire Rises"\nreplace_path="history/countries"\npath="mod/tfr"\n', encoding="utf-8"
+    )
+    (tmp_path / "dlc_load.json").write_text(json.dumps({"enabled_mods": ["mod/tfr.mod"]}), encoding="utf-8")
+    runCycles(runner, monkeypatch, 2)
+    saves = iter([None, (HEADER, "GER.hoi4")])
+    monkeypatch.setattr(runner, "readCurrentSave", lambda pattern, now: next(saves))
+
+    runner.run("*.hoi4", documentsDir=tmp_path)
+
+    idle, campaign = FakePresence.instances[0].updates
+    assert idle["details"] == "Preparing for war..."
+    assert campaign["large_text"] == "The Fire Rises"
+    assert campaign["state"] == "1 Jan 1936 · Regular"
+    assert campaign["details"] == "German Reich — Fascist"
+    assert "status_display_type" not in campaign
+    assert (tmp_path / "hoi4Presence-settings.json").exists()

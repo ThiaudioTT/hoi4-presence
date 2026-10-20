@@ -67,8 +67,8 @@ corrupt `runRPC.cfg` has to cost the presence, never the Play button.
    write access to the file it is autosaving into. Only seven of those lines are
    used; the wider window keeps a HOI4 patch that inserts a header field from
    pushing `difficulty` out of range;
-5. parse those lines into a `SaveHeader`, map the tag to a `Country`, and push
-   the payload to Discord;
+5. parse those lines into a `SaveHeader`, resolve the `Country`, and push the
+   payload to Discord if it differs from the last one sent;
 6. exit once `hoi4.exe` is no longer in the process list.
 
 The Discord connection is opened *inside* the loop, not once up front. Discord
@@ -79,6 +79,13 @@ reconnects; a failed save read does not, because reconnecting would not help.
 
 Those constants live at the top of `hoi4presence.saves` and
 `hoi4presence.runner`.
+
+Before reading the save, each poll also reads, from the documents folder, the
+launcher's `dlc_load.json` and the mods' descriptors, the game's language from
+`settings.txt`, `continue_game.json`, and the player's
+`hoi4Presence-settings.json` (`hoi4presence.session.readSession`). Those give
+the mod line, shown in the flag's hover text, and the country's displayed name.
+See [mods-and-names.md](mods-and-names.md).
 
 ## What the installer changes on disk
 

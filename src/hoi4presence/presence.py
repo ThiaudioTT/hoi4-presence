@@ -25,6 +25,11 @@ LOGO_TEXT = "thiaudiott/hoi4-presence on Github!"
 
 SEPARATOR = " · "
 
+STATUS_DISPLAY = {"game": 0, "country": 2}
+
+FIELD_MIN = 2
+FIELD_MAX = 128
+
 # Save value -> the difficulty name the game's own menu uses.
 DIFFICULTY_NAMES = {
     "very_easy": "Civilian",
@@ -60,6 +65,15 @@ def ideologyImage(ideology: str) -> str:
     return ideology if ideology in IDEOLOGY_NAMES else UNKNOWN_IDEOLOGY_IMAGE
 
 
+def fitField(text: str) -> str | None:
+    text = text.strip()
+    if len(text) < FIELD_MIN:
+        return None
+    if len(text) > FIELD_MAX:
+        return text[: FIELD_MAX - 1].rstrip() + "…"
+    return text
+
+
 def buildIdlePresence(start: float) -> dict[str, object]:
     """Payload shown after connecting, before any save has been read."""
     return {
@@ -70,7 +84,13 @@ def buildIdlePresence(start: float) -> dict[str, object]:
     }
 
 
-def buildPresence(country: Country, header: SaveHeader, start: float) -> dict[str, object]:
+def buildPresence(
+    country: Country,
+    header: SaveHeader,
+    start: float,
+    mods: str = "",
+    statusText: str = "game",
+) -> dict[str, object]:
     """Payload describing the current run, ready to splat into ``RPC.update``.
 
     Ironman takes the small image when it applies: it is the rarer, more
@@ -80,14 +100,18 @@ def buildPresence(country: Country, header: SaveHeader, start: float) -> dict[st
     ideology = displayName(header.ideology, IDEOLOGY_NAMES)
     difficulty = displayName(header.difficulty, DIFFICULTY_NAMES)
     ironman = ["Ironman"] if header.ironman else []
+    modLine = fitField(mods)
 
-    return {
+    payload: dict[str, object] = {
         "state": SEPARATOR.join([header.dateLabel, difficulty, *ironman]),
-        "details": f"{country.name} — {ideology}",
+        "details": fitField(f"{country.name} — {ideology}") or ideology,
         "large_image": country.flag,
         # versionLabel is empty for a save old enough to predate the field.
-        "large_text": SEPARATOR.join(filter(None, [country.name, header.versionLabel])),
+        "large_text": modLine or SEPARATOR.join(filter(None, [country.name, header.versionLabel])),
         "small_image": IRONMAN_IMAGE if header.ironman else ideologyImage(header.ideology),
         "small_text": SEPARATOR.join([ideology, *ironman]),
         "start": start,
     }
+    if STATUS_DISPLAY.get(statusText, 0):
+        payload["status_display_type"] = STATUS_DISPLAY[statusText]
+    return payload
