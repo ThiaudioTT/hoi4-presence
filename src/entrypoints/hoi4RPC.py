@@ -18,7 +18,7 @@ from hoi4presence.runner import run
 def main() -> int:
     baseDir = getBaseDir(__file__)
     setupLogging(baseDir)
-    return run(getSavePath(baseDir))
+    return run(getSavePath(baseDir), documentsDir=baseDir.parent)
 
 
 if __name__ == "__main__":

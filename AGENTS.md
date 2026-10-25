@@ -21,6 +21,10 @@ not obvious from the file layout.
 | `src/hoi4presence/countries.py` | Tag → (name, flag) table plus `getCountry`. |
 | `src/hoi4presence/saves.py` | Finding, reading and parsing save headers. |
 | `src/hoi4presence/presence.py` | Builds the Discord payload dicts. No `pypresence` import. |
+| `src/hoi4presence/mods.py` | The launcher's `dlc_load.json`, `.mod` descriptors, and the mod line. |
+| `src/hoi4presence/localisation.py` | Country names from the enabled mods' localisation files. |
+| `src/hoi4presence/session.py` | Everything read from the documents folder each poll; picks the displayed country name. |
+| `src/hoi4presence/userconfig.py` | The player's `hoi4Presence-settings.json`: template, parsing, defaults. |
 | `src/hoi4presence/runner.py` | The polling loop. **The only module importing `pypresence`/`psutil`.** |
 | `src/hoi4presence/paths.py` | Base-directory resolution and interactive folder discovery. |
 | `src/hoi4presence/logging_setup.py` | Rotating file log for the windowed executables. |
@@ -144,6 +148,17 @@ The ideology keys are also portal asset keys (`assets/ideologies/`), so renaming
 one silently removes its badge. An ideology with no entry falls back to the
 game's `unknown-ideology` icon rather than to nothing.
 
+## Mods, names and settings
+
+[docs/mods-and-names.md](docs/mods-and-names.md) describes how the mod line is
+built, where the country name comes from and in which order, and every key of
+the settings file. Two rules worth keeping when changing it:
+
+- a run with no mod enabled must produce the same payload as before;
+  `tests/test_presence.py` is what checks it;
+- nothing read from the documents folder may raise out of a poll. Every reader
+  returns an empty value on a missing or malformed file.
+
 ## How to release
 
 1. Bump `version.json`.
@@ -163,20 +178,8 @@ game's `unknown-ideology` icon rather than to nothing.
   the wiki is behind a bot challenge so the real image could not be confirmed and
   it falls back to the default logo. The likely URL is noted in a comment beside
   the entry.
-- **Most wiki-hosted flags are probably not rendering.** `countries.py` has 264
-  entries; 92 use a Discord developer-portal asset key and 172 use a URL. Of
-  those 172, **146 point at `hoi4.paradoxwikis.com`, and every one of them now
-  returns a 3 KB anti-bot challenge page instead of the PNG** — `content-type:
-  text/html`, HTTP 200, even with a browser `User-Agent`. Discord fetches these
-  server-side to proxy them, so those countries almost certainly show no flag.
-  Reproduce with:
-
-  ```sh
-  curl -sI https://hoi4.paradoxwikis.com/images/9/9e/Bangladesh.png | grep -i content-type
-  ```
-
-  The 25 `i.imgur.com` links and the portal asset keys still serve real images.
-  Fixing this means re-hosting ~146 flags — most cheaply by uploading them to
-  the Discord developer portal and switching those entries to asset keys, which
-  is what `test_countries_data.py` already expects for portal-hosted flags. It
-  is a data migration, not a code change, so it belongs in its own PR.
+- **Nine countries have no flag.** CSA, AOI, GBA, HRZ, KHI, GUM, NIR, QEM and
+  VLA have no real-world flag to point at since the HOI4 wiki links were
+  replaced (see [docs/mods-and-names.md](docs/mods-and-names.md#flags)), so they
+  use the default logo. Their in-game flags would have to be uploaded to the
+  Discord developer portal.

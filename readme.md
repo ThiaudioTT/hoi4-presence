@@ -28,11 +28,14 @@ Hoi4 Rich Presence
 ## About
 
 A Discord Rich Presence for Hearts of Iron IV, on Windows. It reads your
-autosave and shows the country, ideology, in-game date and difficulty.
+autosave and shows the country, ideology, in-game date and difficulty, and on a
+modded run the mods you are playing and the country's name as the game shows
+it.
 
 ### What the card shows
 
-All of it comes from the save header — nothing hooks into the running game.
+All of it comes from files the game and its launcher write — nothing hooks
+into the running game.
 
 | On the card                     | Where it comes from                                                         |
 | ------------------------------- | --------------------------------------------------------------------------- |
@@ -42,6 +45,15 @@ All of it comes from the save header — nothing hooks into the running game.
 | `15 Jan 1936 · Elite · Ironman` | in-game date, difficulty, and ironman if set                                |
 | hovering the flag               | country and the game patch the save was made on                             |
 | the timer                       | how long the presence has been running                                      |
+
+### On a modded run
+
+Hovering the flag shows the mods: `The Road to 56 + Road to 56 : Expanded + 8 mods`,
+the overhaul and its submods by name and a count of the rest. The country is named the way
+the game names it, so a mod that renames or adds countries is followed. A
+settings file, `hoi4Presence-settings.json` next to the game's `settings.txt`,
+hides, pins or shortens mods and overrides any country's name or flag. All of
+it is described in [docs/mods-and-names.md](docs/mods-and-names.md).
 
 ### Badges
 
