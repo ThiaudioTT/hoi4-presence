@@ -13,6 +13,26 @@ summaries rather than a complete record.
 
 ### Added
 
+- The enabled mods on the presence, in the flag's hover text. They are read
+  from the launcher's `dlc_load.json`. The overhaul (a mod that replaces
+  `history/`, focus trees or events) and the submods that depend on it are
+  named, the rest counted: `The Road to 56 + Road to 56 : Expanded + 8 mods`,
+  or `Vanilla + 5 mods`. Vanilla runs look exactly as before.
+- Country names as the game displays them. First from `continue_game.json`,
+  whose title the game writes with the displayed name (cosmetic tags and
+  native-name mods included) when it describes the save being shown; otherwise
+  from the enabled mods' localisation, `TAG_<ideology>` first, in the game's
+  language before English, with `replace/` files winning over every other mod
+  as they do in game.
+- `hoi4Presence-settings.json`, a settings file written next to `settings.txt`
+  on first run: hide, pin or shorten mod names, list every mod, switch the mod
+  line off, choose what follows "Playing" in the member list, or set a country's
+  name and flag by tag. Read on every poll; a broken file is ignored.
+  Everything above is described in `docs/mods-and-names.md`.
+- Flags that pointed at the HOI4 wiki (all but one returned an anti-bot page,
+  so Discord showed nothing): 138 now point at verified Wikimedia Commons
+  thumbnails; the nine with no real-world flag fall back to the default logo.
+
 - A console UI for `setup.exe`, `uninstall.exe` and `checkupdate.exe`, built on
   `rich`. Each stage of an install now gets a labelled progress bar that stays on
   screen for at least 1.2 seconds, so the whole thing is watchable instead of a
